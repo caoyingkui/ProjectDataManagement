@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <servlet>
+        <description></description>
+        <display-name>dataBrowser</display-name>
+        <servlet-name>dataBrowser</servlet-name>
+        <servlet-class>cn.edu.pku.sei.projectDataManagement.servlets.dataBrowserServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dataBrowser</servlet-name>
+        <url-pattern>/dataBrowser</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description></description>
+        <display-name>Download</display-name>
+        <servlet-name>Download</servlet-name>
+        <servlet-class>cn.edu.pku.sei.projectDataManagement.servlets.DownloadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Download</servlet-name>
+        <url-pattern>/Download</url-pattern>
+    </servlet-mapping>
+</web-app>

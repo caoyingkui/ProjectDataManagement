@@ -1,0 +1,23 @@
+.task-ID{
+    width: 10%;
+}
+
+.task-creator{
+    width:15%;
+}
+
+.task-tableName{
+    width: 15%;
+}
+
+.task-databaseURL{
+    width:30%;
+}
+
+.task-databaseUser{
+    width:15%;
+}
+
+.task-operation{
+    width:20%;
+}

@@ -31,26 +31,47 @@ public class Directory {
         Stackoverflow = bundle.getString("Stackoverflow");
     }
 
-    public static void main(String[] args){
-        System.out.println("asdfasdf");
-        int c = 1;
-        String path ;
-        Scanner sc = new Scanner(System.in);
-        while(c == 1 || c == 2){
-            c = (char)sc.nextInt();
-            path = sc.nextLine().trim();
-            if(c == 1){
-                System.out.println(virtualPathToRealPath(path));
-            }else if(c == 2){
-                System.out.println(realPathToVirtualPath(path , "projects"));
-                System.out.println(" ");
-                System.out.println(realPathToVirtualPath(path , "dataType"));
+    private static List<String> virPaths = new ArrayList<String>();
+    public static void test(File file){
+        File[] files = file.listFiles();
+        String path = "";
+        for(File f : files){
+            //System.out.println(f.getAbsolutePath());
+            //path = realPathToVirtualPath(f.getAbsolutePath() , "projects");
+            virPaths.add(path);
+            //path = realPathToVirtualPath(f.getAbsolutePath() , "dataType");
+            virPaths.add(path);
+            //System.out.println();
+            //System.out.println(realPathToVirtualPath(f.getAbsolutePath() , "dataType"));
+            //System.out.println();
+        }
+        for(File f : files){
+            if(f.isDirectory()){
+                test(f);
             }
         }
-
-
-
     }
+
+    public static void main(String[] args){
+
+        File file = new File("D:\\projectddddDataManagement");
+        test(file);
+        List<File> files;
+        for(String path:virPaths){
+            if(path != null){
+                path = "\\projects\\test";
+                System.out.println(path);
+                files = getSubDirByVirtualPath(path);
+                for(File f : files){
+                   // System.out.println(" " + realPathToVirtualPath(f.getAbsolutePath(), "projects"));
+                }
+            }
+            int i = 0;
+            i ++ ;
+        }
+    }
+
+    //region <path conversion>
     /**
      * All the virtualPath will start with 1:\projects  , like \projects\project1 , which means browse the data by project category
      *                                     2:\dataType , like \dataType\email , which means browser the data by data type category
@@ -62,8 +83,9 @@ public class Directory {
      *          so , when the virtualPath is \projects\project1 , it can not map to a real path
      *          if we add subDirectory to it ,like \projects\projects\email , it can successfully map to \root\email\projects\...
      */
-    static String virtualPathToRealPath(String virtualPath){
+    public static String virtualPathToRealPath(String virtualPath){
         String result = "";
+        String oriPath = virtualPath;
         virtualPath = virtualPath.substring(1); // remove the first char '\'
         String paths[] = virtualPath.split("\\\\");
 
@@ -77,11 +99,11 @@ public class Directory {
                     result = root ;
                     result += ("\\" + paths[2]);
                     result += ("\\" + paths[1]);
-                    for(int i = 2 ; i < paths.length ; i ++){
+                    for(int i = 3 ; i < paths.length ; i ++){
                         result += ("\\" + paths[i]);
                     }
                 }else{
-                    throw new VirtualPathIllegal(virtualPath);
+                    throw new VirtualPathIllegal(oriPath);
                 }
             }else if(paths[0].compareTo("dataType") == 0){
                 result = root;
@@ -89,7 +111,7 @@ public class Directory {
                     result += ("\\" + paths[i]);
                 }
             }else{
-                throw new VirtualPathIllegal(virtualPath);
+                throw new VirtualPathIllegal(oriPath);
             }
         }catch(VirtualPathIllegal e){
             result = null;
@@ -99,33 +121,45 @@ public class Directory {
         }
     }
 
+
+
     /**
      * covert a realPath to a virtualPath;
+     * 1、projectFirst , the virtual path based on projects category 2、dataTypeFirst, the virtual path based on data type category
      * @param realPath
-     * @param type takes 2 values :1、projects , the virtual path based on projects category 2、dataType, the virtual path based on data type category
      * @return the virtual path
      */
-    static String realPathToVirtualPath(String realPath , String type){
+    public static String realPathToVirtualPath_projectFirst(String realPath){
         String result = "";
         String oriPath = realPath;
         try {
             if(isRealPathValid(realPath)) {
-                if (type.compareTo("projects") == 0) {
-                    realPath = realPath.replace(root + "\\" , "");
-                    String[] paths = realPath.split("\\\\");
-                    if(paths.length < 2) throw new RealPathIllegal(oriPath);
-                    // paths[0]: category ; paths[1]: project
-                    result = "\\projects";
-                    result += "\\" + paths[1];
-                    result += "\\" + paths[0];
-                    for(int i = 2 ; i < paths.length ; i++ ){
-                        result += ("\\" + paths[i]);
-                    }
-                } else if (type.compareTo("dataType") == 0) {
-                    result = realPath.replace(root, "\\dataType");
-                } else {
-                    result = null;
+                realPath = realPath.replace(root + "\\" , "");
+                String[] paths = realPath.split("\\\\");
+                if(paths.length < 2) throw new RealPathIllegal(oriPath);
+                // paths[0]: category ; paths[1]: project
+                result = "\\projects";
+                result += "\\" + paths[1];
+                result += "\\" + paths[0];
+                for(int i = 2 ; i < paths.length ; i++ ){
+                    result += ("\\" + paths[i]);
                 }
+            }else{
+                throw new RealPathIllegal(realPath);
+            }
+        }catch(RealPathIllegal e){
+            e.printStackTrace();
+            result = null;
+        }
+        return result;
+    }
+
+    static String realPathToVirtualPath_dataTypeFirst(String realPath){
+        String result = "";
+        String oriPath = realPath;
+        try {
+            if(isRealPathValid(realPath)) {
+                result = realPath.replace(root, "\\dataType");
             }else{
                 throw new RealPathIllegal(oriPath);
             }
@@ -148,15 +182,17 @@ public class Directory {
         }
         return result;
     }
+    //endregion<path conversion>
+
 
     /**
      * get the subDirectory of the specific path, which is represented by a virtual path virtualPath
      * @param virtualPath
      * @return the file set of the virtualPath
      */
-    static List<File> getSubDirByVirtualPath(String virtualPath){
+    public static List<File> getSubDirByVirtualPath(String virtualPath){
         List<File> result = new ArrayList<File>();
-        String[] paths = virtualPath.split("\\\\");
+        String[] paths = virtualPath.substring(1).split("\\\\");
         try{
             if(paths[0].compareTo("projects") == 0){
                 // this is a special case
@@ -229,6 +265,7 @@ public class Directory {
         return result;
     }
 
+    //region <Exceptions>
     //when convert a virtual path to real path failed , it will throw this exception
     private static class VirtualPathIllegal extends Exception{
         public VirtualPathIllegal(String path) {
@@ -247,4 +284,5 @@ public class Directory {
             super(path + " is not a directory, so it is failed to get the subDirectory of this path");
         }
     }
+    //endregion<Exceptions>
  }

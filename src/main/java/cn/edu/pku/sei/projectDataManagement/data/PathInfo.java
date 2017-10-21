@@ -1,5 +1,6 @@
 package cn.edu.pku.sei.projectDataManagement.data;
 
+import cn.edu.pku.sei.projectDataManagement.util.Directory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -12,10 +13,10 @@ import java.text.DecimalFormat;
 
 
 public class PathInfo {
-    private final long KB = 1024;
-    private final long MB = 1024 * KB;
-    private final long GB = 1024 * MB;
-    private final long TB = 1024 * GB;
+    private static final long KB = 1024;
+    private static final long MB = 1024 * KB;
+    private static final long GB = 1024 * MB;
+    private static final long TB = 1024 * GB;
 
     private String dir = "";
     private PathType type = null;
@@ -51,28 +52,25 @@ public class PathInfo {
     //endregion
 
     public static void main(String[] args){
-        File file = new File("D:\\apache\\abdera\\1.1.3");
-        PathInfo info = new PathInfo(file);
-
-        JSONObject object = new JSONObject();
-        JSONArray array = new JSONArray();
-        array.put(new JSONObject().put("data" , "1"));
-        array.put(new JSONObject().put("data" , "2"));
-        object.put("datas" , array);
-        int i= 0;
-        i ++;
+        ;
     }
 
-    public PathInfo(File file){
+    public PathInfo(File file , String type){
+        status = true;
         if(file == null) {
             status = false;
             return;
         }
-        int i = 0;
-        i ++;
         try{
             //region <set the directory of this path>
-            this.dir = file.getAbsolutePath();
+            String path = file.getAbsolutePath();
+            if(type.compareTo("projects") == 0){
+                this.dir = Directory.realPathToVirtualPath_projectFirst(path);
+            }else if(type.compareTo("dataType") == 0){
+                this.dir = Directory.realPathToVirtualPath_projectFirst(path);
+            }else{
+                this.dir = ""; // this case should not occur.
+            }
             //endregion
             //region<set the type of this path , if the path is file then also set the data size >
             if(file.isDirectory()){
@@ -89,6 +87,8 @@ public class PathInfo {
             this.fileName = file.getName();
 
             //endregion
+
+            this.metaInfo = new MetaInfo(file);
 
             //file.l
         }catch (Exception e){
@@ -140,7 +140,7 @@ public class PathInfo {
         return result;
     }
 
-    public static JSONObject toJSONObject(PathInfo[] pathInfos , String dataType){
+    public static JSONObject toJSONObject(PathInfo[] pathInfos , String dataType , String absolutePath){
         JSONObject result = new JSONObject();
         try{
             if(pathInfos == null || pathInfos.length == 0)
@@ -149,6 +149,7 @@ public class PathInfo {
                 throw new JSONObjectConvertFailed("There is no dataType");
             else{
                 result.put("dataType" , dataType);
+                result.put("absolutePath" , absolutePath);
                 JSONArray array = new JSONArray();
                 JSONObject temp = new JSONObject() ;
                 for(PathInfo pathInfo : pathInfos){

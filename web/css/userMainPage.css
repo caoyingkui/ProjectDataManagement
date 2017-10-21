@@ -1,0 +1,28 @@
+
+.operation{
+    width:20px;
+    height:20px;
+    font-size:15px;
+    line-height:20px;
+    border-radius:50%;
+    text-align:center;
+}
+
+
+.test{
+    width:20px;height:20px;font-size:10px;line-height:20px ;color:#666;background:#d2d6de;border-radius:50%;text-align:center;left:18px;top:0
+}
+
+
+.column_index{
+    width: 20px;
+}
+.column_name{
+    width:100px;
+}
+.column_label{
+    width:150px;
+}
+.column_operation{
+    width:150px;
+}
