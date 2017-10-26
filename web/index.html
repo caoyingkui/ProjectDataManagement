@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>Download</title>
+
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <span class="navbar-brand">Download</span>
+        </div>
+
+        <div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+
+            <form class="navbar-form navbar-right">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-lg-1" id="sidebar">
+            <ul class="nav nav-pills nav-stacked">
+                <li :class="{ active : isSources }"><a class="sidebutton tran-hand">Sources</a></li>
+                <li :class="{ active : isProjects }"><a class="sidebutton tran-hand">Projects</a></li>
+            </ul>
+        </div>
+
+        <div class="col-sm-10 col-sm-offset-2">
+
+            <ol class="breadcrumb" id="path">
+                <drc v-for="path in paths" :name="path"></drc>
+                <cur :name="cur"></cur>
+            </ol>
+
+
+            <div class="panel-group" id="lists">
+
+                <doc v-for="item in items" v-bind="item"></doc>
+
+            </div>
+
+            <button type="button" class="btn btn-primary">Download</button>
+
+        </div>
+    </div>
+
+
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/vue/2.4.2/vue.min.js"></script>
+<script src="/js/index.js"></script>
+
+</body>
+</html>

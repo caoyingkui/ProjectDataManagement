@@ -1,0 +1,24 @@
+body {
+    padding-top: 70px;
+}
+.tran-hand:hover {
+    cursor: pointer;
+}
+#sidebar {
+    position: fixed;
+    text-align: center;
+}
+.box {
+    padding-right: 20px;
+}
+.chevron-down {
+    padding-right: 15px;
+}
+.nexthref {
+    color : #337ab7;
+}
+.nexthref:hover {
+    text-decoration: underline;
+    color: #23527c;
+}
+
