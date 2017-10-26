@@ -175,12 +175,14 @@ function showList(arr) {
 
 $(document).ready(function(){
 
-    // sidebar.isSources = true;
-    // sidebar.isProjects = false;
-    // obj = requestBrowse("\\dataType");
-    // path.paths = [];
-    // path.cur = "dataType";
-    // showList(obj.data);
+    sidebar.isSources = true;
+    sidebar.isProjects = false;
+
+    var obj = requestBrowse("\\dataType");
+    path.paths = [];
+    path.cur = "Sources";
+    showList(obj.data);
+    path.fullPath = obj.absolutePath;
 
 });
 
@@ -257,13 +259,17 @@ $(".nexthref").click(function () {
 $("#submit").click(function () {
     var checkboxes = document.getElementsByName("checks");
     var value = null;
+    var prePath = path.fullPath;
+
+    prePath = prePath.replace(/\\/g,"%5C");
+
 
     for (var i = 0; i < checkboxes.length; i++){
         if (checkboxes[i].checked) {
             if (value == null) {
-                value = path.fullPath + "\\" +  checkboxes[i].value;
+                value = prePath + "%5C" +  checkboxes[i].value;
             } else {
-                value = value + "|" + path.fullPath + "\\" + checkboxes[i].value;
+                value = value + "%7C" + prePath + "%5C" + checkboxes[i].value;
             }
         }
     }
