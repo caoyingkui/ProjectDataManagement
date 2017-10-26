@@ -8,7 +8,7 @@
         <description></description>
         <display-name>dataBrowser</display-name>
         <servlet-name>dataBrowser</servlet-name>
-        <servlet-class>cn.edu.pku.sei.projectDataManagement.servlets.dataBrowserServlet</servlet-class>
+        <servlet-class>cn.edu.pku.sei.projectDataManagement.servlets.DataBrowserServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>dataBrowser</servlet-name>

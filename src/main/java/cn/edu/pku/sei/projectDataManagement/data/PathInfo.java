@@ -1,5 +1,7 @@
 package cn.edu.pku.sei.projectDataManagement.data;
 
+import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.MetaInfo;
+import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.PathLevel;
 import cn.edu.pku.sei.projectDataManagement.util.Directory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -67,7 +69,7 @@ public class PathInfo {
             if(type.compareTo("projects") == 0){
                 this.dir = Directory.realPathToVirtualPath_projectFirst(path);
             }else if(type.compareTo("dataType") == 0){
-                this.dir = Directory.realPathToVirtualPath_projectFirst(path);
+                this.dir = Directory.realPathToVirtualPath_dataTypeFirst(path);
             }else{
                 this.dir = ""; // this case should not occur.
             }
@@ -88,7 +90,7 @@ public class PathInfo {
 
             //endregion
 
-            this.metaInfo = new MetaInfo(file);
+            this.metaInfo = new MetaInfo(path , PathLevel.NULL);
 
             //file.l
         }catch (Exception e){
@@ -130,7 +132,7 @@ public class PathInfo {
         JSONObject result = new JSONObject();
         if(status){
             result.put("dir" , this.dir);
-            result.put("type" , this.type.toString());
+            result.put("type" , this.type.toString().toLowerCase());
             result.put("fileName" , this.fileName);
             result.put("dataSize" , this.dataSize );
             result.put("metaInfo" , this.metaInfo.toJSONObject());

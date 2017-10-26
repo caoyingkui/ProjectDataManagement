@@ -350,7 +350,7 @@
           </ul>
 
           <button value="刷新" onclick="handle();">刷新</button>
-          <a href='/images/add.jpg' download="D:\\apache\\abdera\\1.1.3\\apache-abdera-1.1.3-src.tar.gz">下载</a>
+          <a href='/Download'>下载</a>
         </div>
         <div class="box-footer clearfix">
           <ul id="taskBrowserFooter" class="pagination pagination-sm no-margin pull-right">

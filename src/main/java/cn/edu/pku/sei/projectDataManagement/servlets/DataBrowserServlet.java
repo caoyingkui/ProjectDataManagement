@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by oliver on 2017/10/15.
  */
-public class dataBrowserServlet extends HttpServlet {
+public class DataBrowserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request , response);
@@ -45,7 +45,8 @@ public class dataBrowserServlet extends HttpServlet {
         System.out.println("start!");
         JSONObject result = new JSONObject();
         String virtualPath = request.getParameter("directory");
-        File temp = new File(Directory.virtualPathToRealPath(virtualPath));
+        String realPath = Directory.virtualPathToRealPath(virtualPath);
+        File temp = new File(realPath);
         if(  (temp.exists() && temp.isDirectory()) ||  //is a directory
                 !temp.exists() //  \projects\lucene , can not map to a real path , but it is valid
                 ){

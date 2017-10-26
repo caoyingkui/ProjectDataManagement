@@ -84,6 +84,7 @@ public class Directory {
      *          if we add subDirectory to it ,like \projects\projects\email , it can successfully map to \root\email\projects\...
      */
     public static String virtualPathToRealPath(String virtualPath){
+        System.out.println("in");
         String result = "";
         String oriPath = virtualPath;
         virtualPath = virtualPath.substring(1); // remove the first char '\'
@@ -154,7 +155,7 @@ public class Directory {
         return result;
     }
 
-    static String realPathToVirtualPath_dataTypeFirst(String realPath){
+    public static String realPathToVirtualPath_dataTypeFirst(String realPath){
         String result = "";
         String oriPath = realPath;
         try {
