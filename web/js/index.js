@@ -13,7 +13,8 @@ var path = new Vue({
             'Project1',
             'Folders'
         ],
-        cur: 'Documents'
+        cur: 'Documents',
+        fullPath: ''
     },
     components : {
         drc: {
@@ -34,7 +35,7 @@ var lists = new Vue({
         items: [
             {
                 headId : 'head1',
-                checkboxId : 'checkbox1',
+                checkboxVal : 'StackOverflow',
                 name : 'StackOverflow',
                 detail : 'details',
                 collapseHref : '#collapse1',
@@ -45,7 +46,7 @@ var lists = new Vue({
             },
             {
                 headId : 'head2',
-                checkboxId : 'checkbox2',
+                checkboxVal : 'GitHub',
                 name : 'GitHub',
                 detail : 'details',
                 collapseHref : '#collapse2',
@@ -56,7 +57,7 @@ var lists = new Vue({
             },
             {
                 headId : 'head3',
-                checkboxId : 'checkbox3',
+                checkboxVal : 'Mail',
                 name : 'Mail',
                 detail : 'details',
                 collapseHref : '#collapse3',
@@ -67,7 +68,7 @@ var lists = new Vue({
             },
             {
                 headId : 'head4',
-                checkboxId : 'checkbox4',
+                checkboxVal : 'Bugzilla',
                 name : 'Bugzilla',
                 detail : 'details',
                 collapseHref : '#collapse4',
@@ -81,12 +82,12 @@ var lists = new Vue({
     },
     components: {
         doc: {
-            props: ['headId', 'checkboxId', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size'],
+            props: ['headId', 'checkboxVal', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size'],
             template: '<div class="panel panel-default">\n' +
             '                    <div class="panel-heading" :id="headId">\n' +
-            '                        <span class="box" ><input type="checkbox" :id="checkboxId"></span>\n' +
+            '                        <span class="box" ><input type="checkbox" :value="checkboxVal" name="checks"></span>\n' +
             '                        <span class="glyphicon" :class="icon" style="padding-right: 10px"></span>\n' +
-            '                        <span class="panel-title" :class="titleClass">{{ name }}</span>\n' +
+            '                        <span class="panel-title" :class="titleClass" style="width:100px">{{ name }}</span>\n' +
             '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{size}}</span>' +
             '                        <div class="navbar-right chevron-down" >\n' +
 
@@ -125,6 +126,7 @@ function requestBrowse(pathStr) {
 }
 
 function showPath(pathStr) {
+    path.fullPath = pathStr;
     var arr = pathStr.split('\\');
     path.paths=[];
     for (var i = 1; i < arr.length - 1; i++){
@@ -141,7 +143,7 @@ function showList(arr) {
     lists.items=[];
     var tmp = {
         headId : '',
-        checkboxId : '',
+        checkboxVal : '',
         name : '',
         detail : '',
         collapseHref : '',
@@ -152,9 +154,9 @@ function showList(arr) {
     };
     for (var i = 0; i < arr.length; i++) {
         tmp.headId = "head" + i;
-        tmp.checkboxId = "checkbox" + i;
+        tmp.checkboxVal = arr[i].fileName;
         tmp.name = arr[i].fileName;
-        tmp.size = arr[i].size;
+        tmp.size = arr[i].dataSize;
         tmp.detail = JSON.stringify(arr[i].metaInfo);
         tmp.collapseHref = "#collapse" + i;
         tmp.collapseId = "collapse" + i;
@@ -188,11 +190,10 @@ $(".sidebutton").click(function(){
         sidebar.isSources = true;
         sidebar.isProjects = false;
 
-        obj = requestBrowse("\\dataType\\Bug");
+        obj = requestBrowse("\\dataType");
         path.paths = [];
         path.cur = "Sources";
         showList(obj.data);
-        showPath(obj.absolutePath);
 
     } else if ($(this).text() == "Projects") {
         sidebar.isSources = false;
@@ -202,7 +203,6 @@ $(".sidebutton").click(function(){
         path.paths = [];
         path.cur = "Projects";
         showList(obj.data);
-        showPath(obj.absolutePath);
     }
 
 });
@@ -247,5 +247,26 @@ $(".nexthref").click(function () {
 
     showList(obj.data);
     showPath(obj.absolutePath);
+
+});
+
+$("#submit").click(function () {
+    var checkboxes = document.getElementsByName("checks");
+    var value = null;
+
+    for (var i = 0; i < checkboxes.length; i++){
+        if (checkboxes[i].checked) {
+            if (value == null) {
+                value = path.fullPath + checkboxes[i].value;
+            } else {
+                value = value + "|" + path.fullPath + checkboxes[i].value;
+            }
+        }
+    }
+    if (value == null) {
+        alert("choose no files");
+    } else {
+        window.open('Download?reqeustType=downloadFiles&filePaths='+value, '_blank');
+    }
 
 });
