@@ -141,18 +141,19 @@ function showPath(pathStr) {
 
 function showList(arr) {
     lists.items=[];
-    var tmp = {
-        headId : '',
-        checkboxVal : '',
-        name : '',
-        detail : '',
-        collapseHref : '',
-        collapseId : '',
-        icon: '',
-        titleClass : '',
-        size : '',
-    };
+
     for (var i = 0; i < arr.length; i++) {
+        var tmp = {
+            headId : '',
+            checkboxVal : '',
+            name : '',
+            detail : '',
+            collapseHref : '',
+            collapseId : '',
+            icon: '',
+            titleClass : '',
+            size : '',
+        };
         tmp.headId = "head" + i;
         tmp.checkboxVal = arr[i].fileName;
         tmp.name = arr[i].fileName;
@@ -160,10 +161,10 @@ function showList(arr) {
         tmp.detail = JSON.stringify(arr[i].metaInfo);
         tmp.collapseHref = "#collapse" + i;
         tmp.collapseId = "collapse" + i;
-        if (arr[i].type == "file") {
+        if (arr[i].type == "directory") {
             tmp.icon = "glyphicon-folder-open";
             tmp.titleClass = "tran-hand nexthref";
-        } else if (arr[i].type == "directory") {
+        } else if (arr[i].type == "file") {
             tmp.icon = "glyphicon-file";
             tmp.titleClass = "";
         }
@@ -194,6 +195,8 @@ $(".sidebutton").click(function(){
         path.paths = [];
         path.cur = "Sources";
         showList(obj.data);
+        path.fullPath = obj.absolutePath;
+
 
     } else if ($(this).text() == "Projects") {
         sidebar.isSources = false;
@@ -203,6 +206,7 @@ $(".sidebutton").click(function(){
         path.paths = [];
         path.cur = "Projects";
         showList(obj.data);
+        path.fullPath = obj.absolutePath;
     }
 
 });
@@ -257,9 +261,9 @@ $("#submit").click(function () {
     for (var i = 0; i < checkboxes.length; i++){
         if (checkboxes[i].checked) {
             if (value == null) {
-                value = path.fullPath + checkboxes[i].value;
+                value = path.fullPath + "\\" +  checkboxes[i].value;
             } else {
-                value = value + "|" + path.fullPath + checkboxes[i].value;
+                value = value + "|" + path.fullPath + "\\" + checkboxes[i].value;
             }
         }
     }
