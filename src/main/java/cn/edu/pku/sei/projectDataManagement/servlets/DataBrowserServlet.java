@@ -11,9 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -21,6 +19,14 @@ import java.util.zip.ZipOutputStream;
  * Created by oliver on 2017/10/15.
  */
 public class DataBrowserServlet extends HttpServlet {
+    static List<String> dataTypes;
+    static{
+        dataTypes = new ArrayList<String>();
+        ResourceBundle bundle = ResourceBundle.getBundle("configuration");
+        Collections.addAll(dataTypes , bundle.getString("DataTypes").split("|"));
+
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request , response);
@@ -30,12 +36,39 @@ public class DataBrowserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("test");
 
-
-
         String requestType = request.getParameter("requestType");
+        JSONObject result = new JSONObject();
 
         if(requestType.compareTo("browseDirectory") == 0){
-            JSONObject result = browseDirectory(request , response);
+            result = browseDirectory(request , response);
+            response.setContentType("application/json");
+            response.getWriter().print(result.toString());
+        }else if(requestType.compareTo("searchDirctory") == 0){
+            String project = request.getParameter("project").trim();
+            String dataType = requestType.getParameter("dataType").trim();
+            String virtualPath = "";
+            String realPath = "";
+            if( (project == null || project.length() == 0 ) &&
+                    (dataType == null || dataType.length == 0) ){
+                result.put("dataType" , "searchFailed");
+                result.put("errorLog" , "The parameter(s) for searching is/are not valid!");
+            }else{
+                if(project == null || project.length() == 0){
+                    virutalPath = "\\dataType\\" + dataType;
+                }else if( (dataType == null || dataType.length() == 0)){
+                    virtualPath = "\\projects";
+                }else{
+                    virtualPath = "\\dataType\\" + dataType + "\\" + project;
+                }
+                realPath = Directory.virtualPathToRealPath(virtualPath);
+                if(new File(realPath).exists()){
+                    request.setAttribute("directory" , virtualPath);
+                    result = browseDirectory(request , response);
+                }else{
+                    result.put("dataType" , "searchFailed");
+                    result.put("errorLog" , "No result found!");
+                }
+            }
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
         }
@@ -62,4 +95,9 @@ public class DataBrowserServlet extends HttpServlet {
         }
         return result;
     }
+
+    private static boolean contiansDataType(String type){
+        return dataTypes.contains(type);
+    }
+
 }
