@@ -9,5 +9,8 @@ public enum PathLevel {
     GIT_ROOT,
     GIT_PROJECT,
     GIT_MONTH,
+    EMAIL_ROOT,
+    EMAIL_PROJECT,
+    EMAIL_MAILBOX,
     NULL
 }
