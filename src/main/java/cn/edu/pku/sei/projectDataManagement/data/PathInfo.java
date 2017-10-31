@@ -151,7 +151,8 @@ public class PathInfo {
                 throw new JSONObjectConvertFailed("There is no dataType");
             else{
                 result.put("dataType" , dataType);
-                result.put("absolutePath" , absolutePath);
+                if(absolutePath != null)
+                    result.put("absolutePath" , absolutePath);
                 JSONArray array = new JSONArray();
                 JSONObject temp = new JSONObject() ;
                 for(PathInfo pathInfo : pathInfos){

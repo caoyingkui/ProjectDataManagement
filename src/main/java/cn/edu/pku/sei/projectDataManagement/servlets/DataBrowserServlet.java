@@ -40,7 +40,7 @@ public class DataBrowserServlet extends HttpServlet {
         JSONObject result = new JSONObject();
 
         if(requestType.compareTo("browseDirectory") == 0){
-            result = browseDirectory(request , response);
+            result = browseDirectory(request);
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
         }else if(requestType.compareTo("searchDirctory") == 0){
@@ -63,7 +63,7 @@ public class DataBrowserServlet extends HttpServlet {
                 realPath = Directory.virtualPathToRealPath(virtualPath);
                 if(new File(realPath).exists()){
                     request.setAttribute("directory" , virtualPath);
-                    result = browseDirectory(request , response);
+                    result = browseDirectory(request);
                 }else{
                     result.put("dataType" , "searchFailed");
                     result.put("errorLog" , "No result found!");
@@ -74,7 +74,7 @@ public class DataBrowserServlet extends HttpServlet {
         }
     }
 
-    private JSONObject browseDirectory(HttpServletRequest request, HttpServletResponse response){
+    private JSONObject browseDirectory(HttpServletRequest request){
         System.out.println("start!");
         JSONObject result = new JSONObject();
         String virtualPath = request.getParameter("directory");
@@ -94,6 +94,75 @@ public class DataBrowserServlet extends HttpServlet {
             result = null;
         }
         return result;
+    }
+
+    private JSONObject searchDirecotry(HttpServletRequest request){
+        String query = request.getParameter("query");
+        query = query.replaceAll("[ ]+" , " ");
+        String[] parameters = query.split(" ");
+        Set<String> dataTypeSet = new HashSet<String>();
+        Set<String> projectSet = new HashSet<String>();
+
+        for(String parameter : parameters){
+            if(contiansDataType(parameter)){
+                dataTypeSet.add(parameter);
+            }else{
+                if(parameter.length() > 0){
+                    projectSet.add(parameter);
+                }
+            }
+        }
+
+        List<PathInfo> pathInfos = new ArrayList<PathInfo>();
+
+        if(dataTypeSet.size() > 0 && projectSet.size() > 0){
+            String virtualPath ;
+            String realPath;
+            for(String dataType : dataTypeSet){
+                for(String project : projectSet){
+                    virtualPath = "\\dataType\\" + dataType + "\\" + project;
+                    realPath = Directory.virtualPathToRealPath(virtualPath);
+                    File file = new File(realPath);
+                    if(file.exists()){
+                        pathInfos.add(new PathInfo(file , "dataType"));
+                    }
+                }
+            }
+
+            return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
+        }else if(dataTypeSet.size() == 0 && projectSet.size() > 0){
+            String virtualPath;
+            String realPath;
+            for(String project : projectSet){
+                virtualPath = "\\projects\\" + project;
+                realPath = Directory.virtualPathToRealPath(virtualPath);
+                File file = new File(realPath);
+                if(file.exists()){
+                    pathInfos.add(new PathInfo(file , "projects"));
+                }
+            }
+            return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
+        }else if(dataTypeSet.size () > 0 && projectSet.size() == 0){
+            String virtualPath;
+            String realPath;
+            for(String dataType : dataTypeSet){
+                virtualPath = "\\dataType\\" + dataType;
+                realPath = Directory.virtualPathToRealPath(virtualPath);
+                File file = new File(realPath);
+                if(file.exists()){
+                    List<File> subFiles = Directory.getSubDirByVirtualPath(virtualPath);
+                    for(File subFile : subFiles){
+                        pathInfos.add(new PathInfo(subFile , "dataType"));
+                    }
+                }
+            }
+            return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
+        }
+        else{
+            JSONObject result = new JSONObject();
+            result.put("dataType" , "searchFailed");
+            result.put("errorLog" , "No file found!");
+        }
     }
 
     private static boolean contiansDataType(String type){
