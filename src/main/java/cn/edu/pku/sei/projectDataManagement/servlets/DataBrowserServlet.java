@@ -20,10 +20,18 @@ import java.util.zip.ZipOutputStream;
  */
 public class DataBrowserServlet extends HttpServlet {
     static List<String> dataTypes;
+    static Set<String> projects;
     static{
         dataTypes = new ArrayList<String>();
         ResourceBundle bundle = ResourceBundle.getBundle("configuration");
         Collections.addAll(dataTypes , bundle.getString("DataTypes").split("|"));
+
+        projects = getAllProjects();
+    }
+
+    public static void main(String[] args){
+        DataBrowserServlet servlet = new DataBrowserServlet();
+        servlet.searchDirecotry("bug lucene");
 
     }
 
@@ -40,44 +48,18 @@ public class DataBrowserServlet extends HttpServlet {
         JSONObject result = new JSONObject();
 
         if(requestType.compareTo("browseDirectory") == 0){
-            result = browseDirectory(request);
+            result = browseDirectory(request.getParameter("directory"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
-        }else if(requestType.compareTo("searchDirctory") == 0){
-            String project = request.getParameter("project").trim();
-            String dataType = requestType.getParameter("dataType").trim();
-            String virtualPath = "";
-            String realPath = "";
-            if( (project == null || project.length() == 0 ) &&
-                    (dataType == null || dataType.length == 0) ){
-                result.put("dataType" , "searchFailed");
-                result.put("errorLog" , "The parameter(s) for searching is/are not valid!");
-            }else{
-                if(project == null || project.length() == 0){
-                    virutalPath = "\\dataType\\" + dataType;
-                }else if( (dataType == null || dataType.length() == 0)){
-                    virtualPath = "\\projects";
-                }else{
-                    virtualPath = "\\dataType\\" + dataType + "\\" + project;
-                }
-                realPath = Directory.virtualPathToRealPath(virtualPath);
-                if(new File(realPath).exists()){
-                    request.setAttribute("directory" , virtualPath);
-                    result = browseDirectory(request);
-                }else{
-                    result.put("dataType" , "searchFailed");
-                    result.put("errorLog" , "No result found!");
-                }
-            }
+        }else if(requestType.compareTo("searchDirectory") == 0){
+            result = searchDirecotry(request.getParameter("query"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
         }
     }
 
-    private JSONObject browseDirectory(HttpServletRequest request){
-        System.out.println("start!");
+    private JSONObject browseDirectory(String virtualPath){
         JSONObject result = new JSONObject();
-        String virtualPath = request.getParameter("directory");
         String realPath = Directory.virtualPathToRealPath(virtualPath);
         File temp = new File(realPath);
         if(  (temp.exists() && temp.isDirectory()) ||  //is a directory
@@ -96,22 +78,30 @@ public class DataBrowserServlet extends HttpServlet {
         return result;
     }
 
-    private JSONObject searchDirecotry(HttpServletRequest request){
-        String query = request.getParameter("query");
+    private JSONObject searchDirectory(String query){
         query = query.replaceAll("[ ]+" , " ");
         String[] parameters = query.split(" ");
         Set<String> dataTypeSet = new HashSet<String>();
         Set<String> projectSet = new HashSet<String>();
 
+        //region <get all the data types and projects which are contained in the query>
         for(String parameter : parameters){
-            if(contiansDataType(parameter)){
-                dataTypeSet.add(parameter);
-            }else{
-                if(parameter.length() > 0){
-                    projectSet.add(parameter);
+            parameter = parameter.toLowerCase();
+            for(String type : dataTypes){
+                if(type.toLowerCase().compareTo(parameter) == 0){
+                    dataTypeSet.add(type);
                 }
             }
+
+            for(String project : projects){
+                if(project.toLowerCase().compareTo(parameter) == 0){
+                    projectSet.add(project);
+                }
+            }
+
         }
+        //endregion <get all the dataType and projects which are contained in the query>
+
 
         List<PathInfo> pathInfos = new ArrayList<PathInfo>();
 
@@ -162,11 +152,34 @@ public class DataBrowserServlet extends HttpServlet {
             JSONObject result = new JSONObject();
             result.put("dataType" , "searchFailed");
             result.put("errorLog" , "No file found!");
+            return result;
         }
     }
 
-    private static boolean contiansDataType(String type){
-        return dataTypes.contains(type);
+    private static boolean containsDataType(String type){
+        type = type.toLowerCase();
+        for(String dataType : datatypes){
+            if(dataType.toLowerCase().compareTo(type) == 0) return true;
+        }
+
+        return false;
+    }
+
+    private static boolean containsProject(String project){
+        project = project.toLowerCase();
+        for(String p : projects){
+            if(p.toLowerCase().compareTo(project) == 0) return true;
+        }
+        return false;
+    }
+
+    private static Set<String> getAllProjects(){
+        Set<String> result = new HashSet<String>();
+        result.add("lucene");
+        result.add("Stackoverflow");
+        result.add("Email");
+        result.add("Commit");
+        return result;
     }
 
 }
