@@ -8,7 +8,7 @@ import java.util.*;
  */
 public class Directory {
     private static String root = "";
-    private static String bugRoot = "";
+    /*private static String bugRoot = "";
     private static String commitRoot = "";
     private static String emailRoot = "";
     private static String stackoverflowRoot = "";
@@ -16,11 +16,15 @@ public class Directory {
     private static String Bug;
     private static String Commit;
     private static String Email;
-    private static String Stackoverflow;
+    private static String Stackoverflow;*/
+    private static Map<String , String[]> dataTypes;
+    private static Set<String> projects;
     static{
         ResourceBundle bundle = ResourceBundle.getBundle("configuration");
+        initializeDataTypesMap();
+        initializeProjectsSet();
         root = bundle.getString("DataRoot");
-        bugRoot = bundle.getString("BugRoot");
+        /*bugRoot = bundle.getString("BugRoot");
         commitRoot = bundle.getString("CommitRoot");
         emailRoot = bundle.getString("EmailRoot");
         stackoverflowRoot = bundle.getString("StackoverflowRoot");
@@ -28,8 +32,17 @@ public class Directory {
         Bug = bundle.getString("Bug");
         Commit = bundle.getString("Commit");
         Email = bundle.getString("Email");
-        Stackoverflow = bundle.getString("Stackoverflow");
+        Stackoverflow = bundle.getString("Stackoverflow");*/
     }
+
+    public static Map<String ,String[]> getDataTypes(){
+        return dataTypes;
+    }
+
+    public static Set<String> getProjects(){
+        return projects;
+    }
+
 
     private static List<String> virPaths = new ArrayList<String>();
     public static void test(File file){
@@ -172,16 +185,11 @@ public class Directory {
     }
 
     static boolean isRealPathValid(String realPath){
-        boolean result = false;
-        if(realPath.startsWith(bugRoot) ||
-                realPath.startsWith(commitRoot) ||
-                realPath.startsWith(emailRoot) ||
-                realPath.startsWith(stackoverflowRoot)){
-            result = true;
-        }else{
-            result = false;
+        for(String type : dataTypes.keySet()){
+            if(realPath.startsWith(dataTypes.get(type)[0]))
+                return true;
         }
-        return result;
+        return false;
     }
     //endregion<path conversion>
 
@@ -234,37 +242,62 @@ public class Directory {
     private static List<File> findAllDataTypeForAProject(String project){
         List<File> result = new ArrayList<File>();
         String filePath ;
-        File file;
-        //region<find bug path>
-        filePath = bugRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
+
+        for(String type : dataTypes.keySet()){
+            filePath = dataTypes.get(type)[1] + "\\" + project;
+            File file = new File(filePath);
+            if(file.exists()){
+                result.add(file);
+            }
         }
-        //endregion
-        //region<find Commit path>
-        filePath = commitRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
-        }
-        //endregion
-        //region<find Email path>
-        filePath = emailRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
-        }
-        //endregion
-        //region<find Stackoverflow path>
-        filePath = stackoverflowRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
-        }
-        //endregion
         return result;
     }
+
+
+    private static void initializeDataTypesMap(){
+        dataTypes = new HashMap<String, String[]>();
+        ResourceBundle bundle = ResourceBundle.getBundle("configuration");
+
+        String[] types = bundle.getString("DataTypes").split("\\|");
+        String rootPrefix = "Root_";
+        String rootNamePrefix = "RootName_";
+        for(String type : types){
+            //region <get attributes>
+            String root = bundle.getString(rootPrefix + type);
+            String rootName = bundle.getString(rootNamePrefix + type);
+            //endregion <get attributes>
+
+            //region <put attributes into a string array>
+            String[] attributes = new String[2];
+            attributes[0] = root;
+            attributes[1] = rootName;
+            //endregion <put attributes into a string array>
+
+            dataTypes.put(type.toLowerCase() , attributes);
+        }
+    }
+
+    private static void initializeProjectsSet(){
+        // TODO
+        if(dataTypes == null)
+            return ;
+        projects = new HashSet<String>();
+        for(String type : dataTypes.keySet()){
+            String root = dataTypes.get(type)[0]; // value[0] stores the root of the type
+            File rootFile = new File(root);
+            if(rootFile.exists() && rootFile.isDirectory()){
+                File[] fileList = rootFile.listFiles();
+
+                for(File subFile : fileList){
+                    if(subFile.isDirectory()){
+                        projects.add(subFile.getName().toLowerCase());
+                    }
+                }
+
+            }
+        }
+    }
+
 
     //region <Exceptions>
     //when convert a virtual path to real path failed , it will throw this exception

@@ -8,9 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -28,9 +26,15 @@ public class DataBrowserServlet extends HttpServlet {
         initialize();
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         DataBrowserServlet servlet = new DataBrowserServlet();
-        servlet.searchDirectory("bug lucene");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(true){
+            String query = reader.readLine();
+            JSONObject result = servlet.searchDirectory(query);
+            System.out.println(result.toString());
+        }
+
 
     }
 
@@ -102,7 +106,7 @@ public class DataBrowserServlet extends HttpServlet {
         if(dataTypeSet.size() > 0 && projectSet.size() > 0){
             for(String dataType : dataTypeSet){
                 for(String project : projectSet){
-                    virtualPath = "\\dataType\\" + dataType + "\\" + project;
+                    virtualPath = "\\dataType\\" + dataTypes.get(dataType)[1] + "\\" + project; // value[1] stores the root name
                     realPath = Directory.virtualPathToRealPath(virtualPath);
                     File file = new File(realPath);
                     if(file.exists()){
@@ -155,49 +159,9 @@ public class DataBrowserServlet extends HttpServlet {
     }
 
     private static void initialize(){
-        initializeDataTypesMap();
-        initializeProjectsSet();
+        dataTypes = Directory.getDataTypes();
+        projects = Directory.getProjects();
     }
 
-    private static void initializeDataTypesMap(){
-        dataTypes = new HashMap<String, String[]>();
-        ResourceBundle bundle = ResourceBundle.getBundle("configuration");
-
-        String[] types = bundle.getString("DataTypes").split("\\|");
-        String rootPrefix = "Root_";
-        for(String type : types){
-            //region <get attributes>
-            String root = bundle.getString(rootPrefix + type);
-            //endregion <get attributes>
-
-            //region <put attributes into a string array>
-            String[] attributes = new String[1];
-            attributes[0] = root;
-            //endregion <put attributes into a string array>
-
-            dataTypes.put(type.toLowerCase() , attributes);
-        }
-    }
-
-    private static void initializeProjectsSet(){
-        // TODO
-        if(dataTypes == null)
-            return ;
-        projects = new HashSet<String>();
-        for(String type : dataTypes.keySet()){
-            String root = dataTypes.get(type)[0]; // value[0] stores the root of the type
-            File rootFile = new File(root);
-            if(rootFile.exists() && rootFile.isDirectory()){
-                File[] fileList = rootFile.listFiles();
-
-                for(File subFile : fileList){
-                    if(subFile.isDirectory()){
-                        projects.add(subFile.getName().toLowerCase());
-                    }
-                }
-
-            }
-        }
-    }
 
 }
