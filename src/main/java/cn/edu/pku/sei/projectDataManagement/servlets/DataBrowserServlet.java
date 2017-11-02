@@ -31,7 +31,7 @@ public class DataBrowserServlet extends HttpServlet {
 
     public static void main(String[] args){
         DataBrowserServlet servlet = new DataBrowserServlet();
-        servlet.searchDirectory("bug lucene");
+        servlet.searchDirecotry("bug lucene");
 
     }
 
