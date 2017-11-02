@@ -51,7 +51,7 @@ public class DataBrowserServlet extends HttpServlet {
             result = browseDirectory(request.getParameter("directory"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
-        }else if(requestType.compareTo("searchDirectory") == 0){
+        }else if(requestType.compareTo("searchDiretory") == 0){
             result = searchDirectory(request.getParameter("query"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
