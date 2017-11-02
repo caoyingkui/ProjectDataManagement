@@ -24,14 +24,14 @@ public class DataBrowserServlet extends HttpServlet {
     static{
         dataTypes = new ArrayList<String>();
         ResourceBundle bundle = ResourceBundle.getBundle("configuration");
-        Collections.addAll(dataTypes , bundle.getString("DataTypes").split("|"));
+        Collections.addAll(dataTypes , bundle.getString("DataTypes").split("\\|"));
 
         projects = getAllProjects();
     }
 
     public static void main(String[] args){
         DataBrowserServlet servlet = new DataBrowserServlet();
-        servlet.searchDirecotry("bug lucene");
+        servlet.searchDirectory("bug lucene");
 
     }
 
@@ -52,7 +52,7 @@ public class DataBrowserServlet extends HttpServlet {
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
         }else if(requestType.compareTo("searchDirectory") == 0){
-            result = searchDirecotry(request.getParameter("query"));
+            result = searchDirectory(request.getParameter("query"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
         }
@@ -158,7 +158,7 @@ public class DataBrowserServlet extends HttpServlet {
 
     private static boolean containsDataType(String type){
         type = type.toLowerCase();
-        for(String dataType : datatypes){
+        for(String dataType : dataTypes){
             if(dataType.toLowerCase().compareTo(type) == 0) return true;
         }
 
@@ -174,6 +174,7 @@ public class DataBrowserServlet extends HttpServlet {
     }
 
     private static Set<String> getAllProjects(){
+        // TODO
         Set<String> result = new HashSet<String>();
         result.add("lucene");
         result.add("Stackoverflow");
