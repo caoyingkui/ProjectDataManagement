@@ -19,14 +19,13 @@ import java.util.zip.ZipOutputStream;
  * Created by oliver on 2017/10/15.
  */
 public class DataBrowserServlet extends HttpServlet {
-    static List<String> dataTypes;
+
+    // the value is a array of string, which all are the attributes of a kind of data type;
+    // value[0] : the data root of the data. all types are stored in lower case
+    static Map<String , String[]> dataTypes;
     static Set<String> projects;
     static{
-        dataTypes = new ArrayList<String>();
-        ResourceBundle bundle = ResourceBundle.getBundle("configuration");
-        Collections.addAll(dataTypes , bundle.getString("DataTypes").split("\\|"));
-
-        projects = getAllProjects();
+        initialize();
     }
 
     public static void main(String[] args){
@@ -86,18 +85,11 @@ public class DataBrowserServlet extends HttpServlet {
 
         //region <get all the data types and projects which are contained in the query>
         for(String parameter : parameters){
-            parameter = parameter.toLowerCase();
-            for(String type : dataTypes){
-                if(type.toLowerCase().compareTo(parameter) == 0){
-                    dataTypeSet.add(type);
-                }
-            }
+            if(containsDataType(parameter))
+                dataTypeSet.add(parameter);
 
-            for(String project : projects){
-                if(project.toLowerCase().compareTo(parameter) == 0){
-                    projectSet.add(project);
-                }
-            }
+            if(containsProject(parameter))
+                projectSet.add(parameter);
 
         }
         //endregion <get all the dataType and projects which are contained in the query>
@@ -105,9 +97,9 @@ public class DataBrowserServlet extends HttpServlet {
 
         List<PathInfo> pathInfos = new ArrayList<PathInfo>();
 
+        String virtualPath ;
+        String realPath;
         if(dataTypeSet.size() > 0 && projectSet.size() > 0){
-            String virtualPath ;
-            String realPath;
             for(String dataType : dataTypeSet){
                 for(String project : projectSet){
                     virtualPath = "\\dataType\\" + dataType + "\\" + project;
@@ -121,8 +113,6 @@ public class DataBrowserServlet extends HttpServlet {
 
             return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
         }else if(dataTypeSet.size() == 0 && projectSet.size() > 0){
-            String virtualPath;
-            String realPath;
             for(String project : projectSet){
                 virtualPath = "\\projects\\" + project;
                 realPath = Directory.virtualPathToRealPath(virtualPath);
@@ -133,8 +123,6 @@ public class DataBrowserServlet extends HttpServlet {
             }
             return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
         }else if(dataTypeSet.size () > 0 && projectSet.size() == 0){
-            String virtualPath;
-            String realPath;
             for(String dataType : dataTypeSet){
                 virtualPath = "\\dataType\\" + dataType;
                 realPath = Directory.virtualPathToRealPath(virtualPath);
@@ -158,29 +146,58 @@ public class DataBrowserServlet extends HttpServlet {
 
     private static boolean containsDataType(String type){
         type = type.toLowerCase();
-        for(String dataType : dataTypes){
-            if(dataType.toLowerCase().compareTo(type) == 0) return true;
-        }
-
-        return false;
+        return dataTypes.containsKey(type);
     }
 
     private static boolean containsProject(String project){
         project = project.toLowerCase();
-        for(String p : projects){
-            if(p.toLowerCase().compareTo(project) == 0) return true;
-        }
-        return false;
+        return projects.contains(project);
     }
 
-    private static Set<String> getAllProjects(){
+    private static void initialize(){
+        initializeDataTypesMap();
+        initializeProjectsSet();
+    }
+
+    private static void initializeDataTypesMap(){
+        dataTypes = new HashMap<String, String[]>();
+        ResourceBundle bundle = ResourceBundle.getBundle("configuration");
+
+        String[] types = bundle.getString("DataTypes").split("\\|");
+        String rootPrefix = "Root_";
+        for(String type : types){
+            //region <get attributes>
+            String root = bundle.getString(rootPrefix + type);
+            //endregion <get attributes>
+
+            //region <put attributes into a string array>
+            String[] attributes = new String[1];
+            attributes[0] = root;
+            //endregion <put attributes into a string array>
+
+            dataTypes.put(type.toLowerCase() , attributes);
+        }
+    }
+
+    private static void initializeProjectsSet(){
         // TODO
-        Set<String> result = new HashSet<String>();
-        result.add("lucene");
-        result.add("Stackoverflow");
-        result.add("Email");
-        result.add("Commit");
-        return result;
+        if(dataTypes == null)
+            return ;
+        projects = new HashSet<String>();
+        for(String type : dataTypes.keySet()){
+            String root = dataTypes.get(type)[0]; // value[0] stores the root of the type
+            File rootFile = new File(root);
+            if(rootFile.exists() && rootFile.isDirectory()){
+                File[] fileList = rootFile.listFiles();
+
+                for(File subFile : fileList){
+                    if(subFile.isDirectory()){
+                        projects.add(subFile.getName().toLowerCase());
+                    }
+                }
+
+            }
+        }
     }
 
 }
