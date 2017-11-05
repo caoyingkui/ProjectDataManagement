@@ -1,5 +1,7 @@
 package cn.edu.pku.sei.projectDataManagement.util;
 
+import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.PathLevel;
+
 import java.io.File;
 import java.util.*;
 
@@ -8,15 +10,6 @@ import java.util.*;
  */
 public class Directory {
     private static String root = "";
-    /*private static String bugRoot = "";
-    private static String commitRoot = "";
-    private static String emailRoot = "";
-    private static String stackoverflowRoot = "";
-
-    private static String Bug;
-    private static String Commit;
-    private static String Email;
-    private static String Stackoverflow;*/
     private static Map<String , String[]> dataTypes;
     private static Set<String> projects;
     static{
@@ -24,15 +17,6 @@ public class Directory {
         initializeDataTypesMap();
         initializeProjectsSet();
         root = bundle.getString("DataRoot");
-        /*bugRoot = bundle.getString("BugRoot");
-        commitRoot = bundle.getString("CommitRoot");
-        emailRoot = bundle.getString("EmailRoot");
-        stackoverflowRoot = bundle.getString("StackoverflowRoot");
-
-        Bug = bundle.getString("Bug");
-        Commit = bundle.getString("Commit");
-        Email = bundle.getString("Email");
-        Stackoverflow = bundle.getString("Stackoverflow");*/
     }
 
     public static Map<String ,String[]> getDataTypes(){
@@ -298,6 +282,15 @@ public class Directory {
         }
     }
 
+    public static PathLevel getPathLevel(String path){
+        PathLevel result = PathLevel.NULL;
+        File file = new File(path);
+        if( file.exists() && file.isDirectory()){
+
+        }
+
+        return result;
+    }
 
     //region <Exceptions>
     //when convert a virtual path to real path failed , it will throw this exception
