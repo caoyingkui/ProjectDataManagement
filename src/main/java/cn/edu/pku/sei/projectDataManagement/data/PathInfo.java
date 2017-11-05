@@ -1,7 +1,6 @@
 package cn.edu.pku.sei.projectDataManagement.data;
 
-import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.MetaInfo;
-import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.PathLevel;
+import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.*;
 import cn.edu.pku.sei.projectDataManagement.util.Directory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -89,10 +88,29 @@ public class PathInfo {
             this.fileName = file.getName();
 
             //endregion
-
+            //region <set the metaInfo of this path>
+            PathLevel pathLevel = Directory.getPathLevel(path);
+            switch (pathLevel){
+                case BUGZILLA_PROJECT:
+                case BUGZILLA_ROOT:{
+                    this.metaInfo = new BugzillaInfo(path , pathLevel);
+                    break;
+                }
+                case GIT_ROOT:
+                case GIT_PROJECT:
+                case GIT_MONTH:{
+                    this.metaInfo = new GitInfo(path , pathLevel);
+                    break;
+                }
+                case EMAIL_ROOT:
+                case EMAIL_PROJECT:
+                case EMAIL_MAILBOX:{
+                    this.metaInfo = new EmailInfo(path , pathLevel);
+                    break;
+                }
+            }
             this.metaInfo = new MetaInfo(path , PathLevel.NULL);
-
-            //file.l
+            //endregion <set the metaInfo of this path>
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -168,7 +186,6 @@ public class PathInfo {
         }
         return result;
     }
-
 
     private class FileSizeTooLarge extends Exception{
 

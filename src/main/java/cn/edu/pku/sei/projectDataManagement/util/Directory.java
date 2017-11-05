@@ -4,6 +4,8 @@ import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.PathLevel;
 
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by oliver on 2017/10/15.
@@ -283,12 +285,62 @@ public class Directory {
     }
 
     public static PathLevel getPathLevel(String path){
+        path = path.replace(root , "");
         PathLevel result = PathLevel.NULL;
         File file = new File(path);
+        Matcher matcher = null;
         if( file.exists() && file.isDirectory()){
+            //region <Bugzilla>
+            if(path.startsWith("cn.edu.pku.EOSCN.crawler.BugzillaCrawler")){
+                path = path.replace("cn.edu.pku.EOSCN.crawler.BugzillaCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[^\\\\]+");
+                if(path.length() == 0)
+                    result = PathLevel.BUGZILLA_ROOT;
+                else if(projectPattern.matcher(path).find())
+                    result = PathLevel.BUGZILLA_PROJECT;
+            }//endregion <Bugzilla>
+            //region <Git>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.GitCrawler")){
+                path = path.replace("cn.edu.pku.EOSCN.crawler.GitCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[^\\\\]+");
+                Pattern monthPattern = Pattern.compile("([^\\\\]+\\\\){2}[0-9]{4}-[0-9]{2}");
+                if(path.length() == 0)
+                    result = PathLevel.GIT_ROOT;
+                else if(projectPattern.matcher(path).find())
+                    result = PathLevel.GIT_PROJECT;
+                else if(monthPattern.matcher(path).find())
+                    result = PathLevel.GIT_MONTH;
+            }
+            //endregion <Git>
+            //region <Jira>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.JiraIssueCrawler")){
 
+            }
+            //endregion<Jira>
+            //region <MainSite>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.MainSiteCrawler")){
+
+            }
+            //endregion<MainSite>
+            //region <MailBox>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.MboxCrawler")){
+                path = path.replace("cn.edu.pku.EOSCN.crawler.MboxCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[^\\\\]+]");
+                Pattern mailBoxPattern = Pattern.compile("[^\\\\]+[\\\\][^\\\\]");
+                if(path.length() == 0)
+                    return PathLevel.EMAIL_ROOT;
+                else if(projectPattern.matcher(path).find())
+                    return PathLevel.EMAIL_PROJECT;
+                else if(mailBoxPattern.matcher(path).find())
+                    return PathLevel.EMAIL_MAILBOX;
+            }
+            //endregion <MailBox>
+            //region <Stackoverflow>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.StackOverflow")){
+
+            }
+            //endregion <Stackoverflow>
         }
-
         return result;
     }
 
