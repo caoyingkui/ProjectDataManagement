@@ -32,7 +32,7 @@
                 <div class="form-group">
                     <input type="text" class="form-control" placeholder="Search" id="searchword">
                 </div>
-                <input class="btn btn-default" type="button" value="Submit" id="search">
+                <input class="btn btn-default" type="button" value="Submit" onclick="search()">
 
             </div>
         </div>
@@ -46,8 +46,8 @@
 
         <div class="col-lg-1" id="sidebar">
             <ul class="nav nav-pills nav-stacked">
-                <li :class="{ active : isSources }"><a class="sidebutton tran-hand">Sources</a></li>
-                <li :class="{ active : isProjects }"><a class="sidebutton tran-hand">Projects</a></li>
+                <li :class="{ active : isSources }"><a class="tran-hand" onclick="sidebutton(this.textContent)">Sources</a></li>
+                <li :class="{ active : isProjects }"><a class="tran-hand" onclick="sidebutton(this.textContent)">Projects</a></li>
             </ul>
         </div>
 
@@ -65,7 +65,7 @@
 
             </div>
 
-            <input class="btn btn-primary" type="button" value="Download" id="submit">
+            <input class="btn btn-primary" type="button" value="Download" onclick="submit()">
 
         </div>
     </div>
