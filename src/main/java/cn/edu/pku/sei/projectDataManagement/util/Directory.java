@@ -285,11 +285,12 @@ public class Directory {
     }
 
     public static PathLevel getPathLevel(String path){
-        path = path.replace(root , "");
+
         PathLevel result = PathLevel.NULL;
         File file = new File(path);
         Matcher matcher = null;
         if( file.exists() && file.isDirectory()){
+            path = path.replace(root , "");
             //region <Bugzilla>
             if(path.startsWith("cn.edu.pku.EOSCN.crawler.BugzillaCrawler")){
                 path = path.replace("cn.edu.pku.EOSCN.crawler.BugzillaCrawler" , "");

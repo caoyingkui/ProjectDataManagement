@@ -31,6 +31,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="JAX-WS-Glassfish / JAX-WS 2.2 RI / Metro 1.X / JWSDP 2.2" level="project" />
     <orderEntry type="library" name="sqlConnector" level="project" />
+    <orderEntry type="library" name="Maven: cn.edu.pku.sei.tsr:sql-connector:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20160810" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Maven: cn.edu.pku.sei.tsr:sql-connector:1.0-SNAPSHOT" level="project" />

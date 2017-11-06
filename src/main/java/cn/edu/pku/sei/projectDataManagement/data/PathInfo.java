@@ -53,7 +53,23 @@ public class PathInfo {
     //endregion
 
     public static void main(String[] args){
-        ;
+        File file = new File("E:\\CrawlData\\Apache");
+        show(file);
+    }
+
+    public static void show(File file){
+        PathInfo Info = new PathInfo(file , "dataType");
+        System.out.println(Info.toJSONObject().toString());
+
+        File[] files = file.listFiles();
+        for(File f : files){
+            if(f.isDirectory()){
+                show(f);
+            }else if(f.isFile()){
+                Info = new PathInfo(f , "dataType");
+                //System.out.println(Info.toJSONObject().toString());
+            }
+        }
     }
 
     public PathInfo(File file , String type){
@@ -108,8 +124,10 @@ public class PathInfo {
                     this.metaInfo = new EmailInfo(path , pathLevel);
                     break;
                 }
+                case NULL:{
+                    this.metaInfo = new MetaInfo(path , pathLevel);
+                }
             }
-            this.metaInfo = new MetaInfo(path , PathLevel.NULL);
             //endregion <set the metaInfo of this path>
         }catch (Exception e){
             e.printStackTrace();
