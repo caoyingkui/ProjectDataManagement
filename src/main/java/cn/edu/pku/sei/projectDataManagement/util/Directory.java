@@ -1,35 +1,34 @@
 package cn.edu.pku.sei.projectDataManagement.util;
 
+import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.PathLevel;
+
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by oliver on 2017/10/15.
  */
 public class Directory {
     private static String root = "";
-    private static String bugRoot = "";
-    private static String commitRoot = "";
-    private static String emailRoot = "";
-    private static String stackoverflowRoot = "";
-
-    private static String Bug;
-    private static String Commit;
-    private static String Email;
-    private static String Stackoverflow;
+    private static Map<String , String[]> dataTypes;
+    private static Set<String> projects;
     static{
         ResourceBundle bundle = ResourceBundle.getBundle("configuration");
+        initializeDataTypesMap();
+        initializeProjectsSet();
         root = bundle.getString("DataRoot");
-        bugRoot = bundle.getString("BugRoot");
-        commitRoot = bundle.getString("CommitRoot");
-        emailRoot = bundle.getString("EmailRoot");
-        stackoverflowRoot = bundle.getString("StackoverflowRoot");
-
-        Bug = bundle.getString("Bug");
-        Commit = bundle.getString("Commit");
-        Email = bundle.getString("Email");
-        Stackoverflow = bundle.getString("Stackoverflow");
     }
+
+    public static Map<String ,String[]> getDataTypes(){
+        return dataTypes;
+    }
+
+    public static Set<String> getProjects(){
+        return projects;
+    }
+
 
     private static List<String> virPaths = new ArrayList<String>();
     public static void test(File file){
@@ -172,16 +171,11 @@ public class Directory {
     }
 
     static boolean isRealPathValid(String realPath){
-        boolean result = false;
-        if(realPath.startsWith(bugRoot) ||
-                realPath.startsWith(commitRoot) ||
-                realPath.startsWith(emailRoot) ||
-                realPath.startsWith(stackoverflowRoot)){
-            result = true;
-        }else{
-            result = false;
+        for(String type : dataTypes.keySet()){
+            if(realPath.startsWith(dataTypes.get(type)[0]))
+                return true;
         }
-        return result;
+        return false;
     }
     //endregion<path conversion>
 
@@ -234,35 +228,119 @@ public class Directory {
     private static List<File> findAllDataTypeForAProject(String project){
         List<File> result = new ArrayList<File>();
         String filePath ;
-        File file;
-        //region<find bug path>
-        filePath = bugRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
+
+        for(String type : dataTypes.keySet()){
+            filePath = dataTypes.get(type)[1] + "\\" + project;
+            File file = new File(filePath);
+            if(file.exists()){
+                result.add(file);
+            }
         }
-        //endregion
-        //region<find Commit path>
-        filePath = commitRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
+        return result;
+    }
+
+
+    private static void initializeDataTypesMap(){
+        dataTypes = new HashMap<String, String[]>();
+        ResourceBundle bundle = ResourceBundle.getBundle("configuration");
+
+        String[] types = bundle.getString("DataTypes").split("\\|");
+        String rootPrefix = "Root_";
+        String rootNamePrefix = "RootName_";
+        for(String type : types){
+            //region <get attributes>
+            String root = bundle.getString(rootPrefix + type);
+            String rootName = bundle.getString(rootNamePrefix + type);
+            //endregion <get attributes>
+
+            //region <put attributes into a string array>
+            String[] attributes = new String[2];
+            attributes[0] = root;
+            attributes[1] = rootName;
+            //endregion <put attributes into a string array>
+
+            dataTypes.put(type.toLowerCase() , attributes);
         }
-        //endregion
-        //region<find Email path>
-        filePath = emailRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
+    }
+
+    private static void initializeProjectsSet(){
+        // TODO
+        if(dataTypes == null)
+            return ;
+        projects = new HashSet<String>();
+        for(String type : dataTypes.keySet()){
+            String root = dataTypes.get(type)[0]; // value[0] stores the root of the type
+            File rootFile = new File(root);
+            if(rootFile.exists() && rootFile.isDirectory()){
+                File[] fileList = rootFile.listFiles();
+
+                for(File subFile : fileList){
+                    if(subFile.isDirectory()){
+                        projects.add(subFile.getName().toLowerCase());
+                    }
+                }
+
+            }
         }
-        //endregion
-        //region<find Stackoverflow path>
-        filePath = stackoverflowRoot + "\\" + project;
-        file = new File(filePath);
-        if(file.exists()){
-            result.add(file);
+    }
+
+    public static PathLevel getPathLevel(String path){
+        path = path.replace(root , "");
+        PathLevel result = PathLevel.NULL;
+        File file = new File(path);
+        Matcher matcher = null;
+        if( file.exists() && file.isDirectory()){
+            //region <Bugzilla>
+            if(path.startsWith("cn.edu.pku.EOSCN.crawler.BugzillaCrawler")){
+                path = path.replace("cn.edu.pku.EOSCN.crawler.BugzillaCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[^\\\\]+");
+                if(path.length() == 0)
+                    result = PathLevel.BUGZILLA_ROOT;
+                else if(projectPattern.matcher(path).find())
+                    result = PathLevel.BUGZILLA_PROJECT;
+            }//endregion <Bugzilla>
+            //region <Git>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.GitCrawler")){
+                path = path.replace("cn.edu.pku.EOSCN.crawler.GitCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[^\\\\]+");
+                Pattern monthPattern = Pattern.compile("([^\\\\]+\\\\){2}[0-9]{4}-[0-9]{2}");
+                if(path.length() == 0)
+                    result = PathLevel.GIT_ROOT;
+                else if(projectPattern.matcher(path).find())
+                    result = PathLevel.GIT_PROJECT;
+                else if(monthPattern.matcher(path).find())
+                    result = PathLevel.GIT_MONTH;
+            }
+            //endregion <Git>
+            //region <Jira>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.JiraIssueCrawler")){
+
+            }
+            //endregion<Jira>
+            //region <MainSite>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.MainSiteCrawler")){
+
+            }
+            //endregion<MainSite>
+            //region <MailBox>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.MboxCrawler")){
+                path = path.replace("cn.edu.pku.EOSCN.crawler.MboxCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[^\\\\]+]");
+                Pattern mailBoxPattern = Pattern.compile("[^\\\\]+[\\\\][^\\\\]");
+                if(path.length() == 0)
+                    return PathLevel.EMAIL_ROOT;
+                else if(projectPattern.matcher(path).find())
+                    return PathLevel.EMAIL_PROJECT;
+                else if(mailBoxPattern.matcher(path).find())
+                    return PathLevel.EMAIL_MAILBOX;
+            }
+            //endregion <MailBox>
+            //region <Stackoverflow>
+            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.StackOverflow")){
+
+            }
+            //endregion <Stackoverflow>
         }
-        //endregion
         return result;
     }
 

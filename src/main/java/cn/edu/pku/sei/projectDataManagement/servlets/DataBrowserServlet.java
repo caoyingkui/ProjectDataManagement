@@ -8,12 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -21,6 +17,27 @@ import java.util.zip.ZipOutputStream;
  * Created by oliver on 2017/10/15.
  */
 public class DataBrowserServlet extends HttpServlet {
+
+    // the value is a array of string, which all are the attributes of a kind of data type;
+    // value[0] : the data root of the data. all types are stored in lower case
+    static Map<String , String[]> dataTypes;
+    static Set<String> projects;
+    static{
+        initialize();
+    }
+
+    public static void main(String[] args) throws IOException {
+        DataBrowserServlet servlet = new DataBrowserServlet();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(true){
+            String query = reader.readLine();
+            JSONObject result = servlet.searchDirectory(query);
+            System.out.println(result.toString());
+        }
+
+
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request , response);
@@ -30,21 +47,22 @@ public class DataBrowserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("test");
 
-
-
         String requestType = request.getParameter("requestType");
+        JSONObject result = new JSONObject();
 
         if(requestType.compareTo("browseDirectory") == 0){
-            JSONObject result = browseDirectory(request , response);
+            result = browseDirectory(request.getParameter("directory"));
+            response.setContentType("application/json");
+            response.getWriter().print(result.toString());
+        }else if(requestType.compareTo("searchDiretory") == 0){
+            result = searchDirectory(request.getParameter("query"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
         }
     }
 
-    private JSONObject browseDirectory(HttpServletRequest request, HttpServletResponse response){
-        System.out.println("start!");
+    private JSONObject browseDirectory(String virtualPath){
         JSONObject result = new JSONObject();
-        String virtualPath = request.getParameter("directory");
         String realPath = Directory.virtualPathToRealPath(virtualPath);
         File temp = new File(realPath);
         if(  (temp.exists() && temp.isDirectory()) ||  //is a directory
@@ -62,4 +80,88 @@ public class DataBrowserServlet extends HttpServlet {
         }
         return result;
     }
+
+    private JSONObject searchDirectory(String query){
+        query = query.replaceAll("[ ]+" , " ");
+        String[] parameters = query.split(" ");
+        Set<String> dataTypeSet = new HashSet<String>();
+        Set<String> projectSet = new HashSet<String>();
+
+        //region <get all the data types and projects which are contained in the query>
+        for(String parameter : parameters){
+            if(containsDataType(parameter))
+                dataTypeSet.add(parameter);
+
+            if(containsProject(parameter))
+                projectSet.add(parameter);
+
+        }
+        //endregion <get all the dataType and projects which are contained in the query>
+
+
+        List<PathInfo> pathInfos = new ArrayList<PathInfo>();
+
+        String virtualPath ;
+        String realPath;
+        if(dataTypeSet.size() > 0 && projectSet.size() > 0){
+            for(String dataType : dataTypeSet){
+                for(String project : projectSet){
+                    virtualPath = "\\dataType\\" + dataTypes.get(dataType)[1] + "\\" + project; // value[1] stores the root name
+                    realPath = Directory.virtualPathToRealPath(virtualPath);
+                    File file = new File(realPath);
+                    if(file.exists()){
+                        pathInfos.add(new PathInfo(file , "dataType"));
+                    }
+                }
+            }
+
+            return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
+        }else if(dataTypeSet.size() == 0 && projectSet.size() > 0){
+            for(String project : projectSet){
+                virtualPath = "\\projects\\" + project;
+                realPath = Directory.virtualPathToRealPath(virtualPath);
+                File file = new File(realPath);
+                if(file.exists()){
+                    pathInfos.add(new PathInfo(file , "projects"));
+                }
+            }
+            return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
+        }else if(dataTypeSet.size () > 0 && projectSet.size() == 0){
+            for(String dataType : dataTypeSet){
+                virtualPath = "\\dataType\\" + dataType;
+                realPath = Directory.virtualPathToRealPath(virtualPath);
+                File file = new File(realPath);
+                if(file.exists()){
+                    List<File> subFiles = Directory.getSubDirByVirtualPath(virtualPath);
+                    for(File subFile : subFiles){
+                        pathInfos.add(new PathInfo(subFile , "dataType"));
+                    }
+                }
+            }
+            return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
+        }
+        else{
+            JSONObject result = new JSONObject();
+            result.put("dataType" , "searchFailed");
+            result.put("errorLog" , "No file found!");
+            return result;
+        }
+    }
+
+    private static boolean containsDataType(String type){
+        type = type.toLowerCase();
+        return dataTypes.containsKey(type);
+    }
+
+    private static boolean containsProject(String project){
+        project = project.toLowerCase();
+        return projects.contains(project);
+    }
+
+    private static void initialize(){
+        dataTypes = Directory.getDataTypes();
+        projects = Directory.getProjects();
+    }
+
+
 }
