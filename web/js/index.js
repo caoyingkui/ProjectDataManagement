@@ -18,7 +18,7 @@ var path = new Vue({
     components : {
         drc: {
             props: ['name'],
-            template: '<li><a class="tran-hand prevhref">{{name}}</a></li>'
+            template: '<li><a class="tran-hand prevhref" onclick="prevhref(this.textContent)">{{name}}</a></li>'
         },
         cur: {
             props: ['name'],
@@ -39,9 +39,8 @@ var lists = new Vue({
                 detail : 'details',
                 collapseHref : '#collapse1',
                 collapseId : 'collapse1',
-                icon: 'glyphicon-file',
-                titleClass : '',
-                size : "50M"
+                size : "50M",
+                isFolder : false,
 
             },
             {
@@ -51,9 +50,8 @@ var lists = new Vue({
                 detail : 'details',
                 collapseHref : '#collapse2',
                 collapseId : 'collapse2',
-                icon: 'glyphicon-file',
-                titleClass : '',
-                size : "50M"
+                size : "50M",
+                isFolder : false,
             },
             {
                 headId : 'head3',
@@ -62,9 +60,8 @@ var lists = new Vue({
                 detail : 'details',
                 collapseHref : '#collapse3',
                 collapseId : 'collapse3',
-                icon: 'glyphicon-folder-open',
-                titleClass : 'tran-hand nexthref',
-                size : "50M"
+                size : "50M",
+                isFolder : true,
             },
             {
                 headId : 'head4',
@@ -73,24 +70,22 @@ var lists = new Vue({
                 detail : 'details',
                 collapseHref : '#collapse4',
                 collapseId : 'collapse4',
-                icon: 'glyphicon-folder-open',
-                titleClass : 'tran-hand nexthref',
-                size : '50M'
+                size : '50M',
+                isFolder : true,
             }
         ]
 
     },
     components: {
         doc: {
-            props: ['headId', 'abPath', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size'],
-            template: '<div class="panel panel-default">\n' +
+            props: ['headId', 'abPath', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size', 'isFolder'],
+            template: '<div class="panel panel-default" v-if=isFolder>\n' +
             '                    <div class="panel-heading" :id="headId">\n' +
             '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
-            '                        <span class="glyphicon" :class="icon" style="padding-right: 10px"></span>\n' +
-            '                        <span class="panel-title" :class="titleClass" style="width:100px">{{ name }}</span>\n' +
-            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{size}}</span>' +
+            '                        <span class="glyphicon glyphicon-folder-open" style="padding-right: 10px"></span>\n' +
+            '                        <span class="panel-title tran-hand nexthref" style="width:100px" onclick="nexthref(this.textContent)">{{ name }}</span>\n' +
+            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{ size }}</span>' +
             '                        <div class="navbar-right chevron-down" >\n' +
-
             '                            <span class="glyphicon glyphicon-chevron-down tran-hand" data-toggle="collapse" data-parent="#lists" :href="collapseHref"></span>\n' +
             '                        </div>\n' +
             '                        \n' +
@@ -100,7 +95,24 @@ var lists = new Vue({
             '                            {{ detail }}\n' +
             '                        </div>\n' +
             '                    </div>\n' +
-            '                </div>'
+            '         </div>\n' +
+            '         <div class="panel panel-default" v-else>\n' +
+            '                    <div class="panel-heading" :id="headId">\n' +
+            '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
+            '                        <span class="glyphicon glyphicon-file" style="padding-right: 10px"></span>\n' +
+            '                        <span class="panel-title" style="width:100px">{{ name }}</span>\n' +
+            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{ size }}</span>' +
+            '                        <div class="navbar-right chevron-down" >\n' +
+            '                            <span class="glyphicon glyphicon-chevron-down tran-hand" data-toggle="collapse" data-parent="#lists" :href="collapseHref"></span>\n' +
+            '                        </div>\n' +
+            '                        \n' +
+            '                    </div>\n' +
+            '                    <div :id="collapseId" class="panel-collapse collapse">\n' +
+            '                        <div class="panel-body">\n' +
+            '                            {{ detail }}\n' +
+            '                        </div>\n' +
+            '                    </div>\n' +
+            '          </div>'
         }
 
     }
@@ -149,9 +161,8 @@ function showList(arr) {
             detail : '',
             collapseHref : '',
             collapseId : '',
-            icon: '',
-            titleClass : '',
             size : '',
+            isFolder : true,
         };
         tmp.headId = "head" + i;
         tmp.abPath = arr[i].dir;
@@ -161,11 +172,9 @@ function showList(arr) {
         tmp.collapseHref = "#collapse" + i;
         tmp.collapseId = "collapse" + i;
         if (arr[i].type == "directory") {
-            tmp.icon = "glyphicon-folder-open";
-            tmp.titleClass = "tran-hand nexthref";
+            tmp.isFolder = true;
         } else if (arr[i].type == "file") {
-            tmp.icon = "glyphicon-file";
-            tmp.titleClass = "";
+            tmp.isFolder = false;
         }
         lists.items.push(tmp);
     }
@@ -183,10 +192,10 @@ $(document).ready(function(){
 
 });
 
-$(".sidebutton").click(function(){
+function sidebutton(text){
     var obj;
 
-    if ($(this).text() == "Sources") {
+    if (text == "Sources") {
         sidebar.isSources = true;
         sidebar.isProjects = false;
 
@@ -195,7 +204,7 @@ $(".sidebutton").click(function(){
         path.cur = "Sources";
         showList(obj.data);
 
-    } else if ($(this).text() == "Projects") {
+    } else if (text == "Projects") {
         sidebar.isSources = false;
         sidebar.isProjects = true;
 
@@ -205,12 +214,13 @@ $(".sidebutton").click(function(){
         showList(obj.data);
     }
 
-});
+};
 
-$(".prevhref").click(function (){
+function prevhref(name){
     var pathstr = "";
     var i = path.paths.length - 1;
-    while(i > 0 && $(this).text() != path.paths[i]) {
+
+    while(i > 0 && name != path.paths[i]) {
         i--;
     }
     while (i > 0) {
@@ -229,26 +239,22 @@ $(".prevhref").click(function (){
     showList(obj.data);
     showPath(obj.absolutePath);
 
-});
+};
 
-$(".nexthref").click(function () {
-    var name = $(this).text();
+function nexthref(name) {
     for (var i = 0; i < lists.items.length; i++) {
         if (name == lists.items[i].name) {
-            var obj = requestBrowse(lists.items[i].abPath);
+            var name = requestBrowse(lists.items[i].abPath);
             showList(obj.data);
             showPath(obj.absolutePath);
             break;
         }
     }
-});
+};
 
-$("#submit").click(function () {
+function submit() {
     var checkboxes = document.getElementsByName("checks");
     var value = null;
-
-    prePath = prePath.replace(/\\/g,"%5C");
-
 
     for (var i = 0; i < checkboxes.length; i++){
         if (checkboxes[i].checked) {
@@ -265,9 +271,9 @@ $("#submit").click(function () {
         window.open('Download?reqeustType=downloadFiles&filePaths='+value, '_blank');
     }
 
-});
+};
 
-$("#search").click(function () {
+function search () {
     var searchStr = document.getElementById("searchword").value;
     var para = {
         requestType: "searchDirectory",
@@ -292,4 +298,4 @@ $("#search").click(function () {
             }
         }
     });
-});
+};
