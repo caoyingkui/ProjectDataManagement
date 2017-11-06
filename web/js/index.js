@@ -18,7 +18,7 @@ var path = new Vue({
     components : {
         drc: {
             props: ['name'],
-            template: '<li><a class="tran-hand prevhref">{{name}}</a></li>'
+            template: '<li><a class="tran-hand prevhref" onclick="prevhref(this)">{{name}}</a></li>'
         },
         cur: {
             props: ['name'],
@@ -87,7 +87,7 @@ var lists = new Vue({
             '                    <div class="panel-heading" :id="headId">\n' +
             '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
             '                        <span class="glyphicon" :class="icon" style="padding-right: 10px"></span>\n' +
-            '                        <span class="panel-title" :class="titleClass" style="width:100px">{{ name }}</span>\n' +
+            '                        <span class="panel-title" :class="titleClass" onclick="nexthref(this)" style="width:100px">{{ name }}</span>\n' +
             '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{size}}</span>' +
             '                        <div class="navbar-right chevron-down" >\n' +
 
@@ -207,7 +207,7 @@ $(".sidebutton").click(function(){
 
 });
 
-$(".prevhref").click(function (){
+/*$(".prevhref").click(function (){
     var pathstr = "";
     var i = path.paths.length - 1;
     while(i > 0 && $(this).text() != path.paths[i]) {
@@ -228,10 +228,33 @@ $(".prevhref").click(function (){
 
     showList(obj.data);
     showPath(obj.absolutePath);
+});*/
+function prevhref(obj){
 
-});
+    var name = $(obj).text();
+    var pathstr = "";
+    var i = path.paths.length - 1;
+    while(i > 0 && name != path.paths[i]) {
+        i--;
+    }
+    while (i > 0) {
+        pathstr = "\\" + path.paths[i] + pathstr;
+        i--;
+    }
 
-$(".nexthref").click(function () {
+    if (path.paths[0] == "Sources") {
+        pathstr = "\\dataType" + pathstr;
+    } else if (path.paths[0] == "Projects") {
+        pathstr = "\\projects" + pathstr;
+    }
+
+    var obj = requestBrowse(pathstr);
+
+    showList(obj.data);
+    showPath(obj.absolutePath);
+};
+/*$(".nexthref").click(function () {
+    return;
     var name = $(this).text();
     for (var i = 0; i < lists.items.length; i++) {
         if (name == lists.items[i].name) {
@@ -241,8 +264,18 @@ $(".nexthref").click(function () {
             break;
         }
     }
-});
-
+});*/
+function nexthref(obj) {
+    var name = $(obj).text();
+    for (var i = 0; i < lists.items.length; i++) {
+        if (name == lists.items[i].name) {
+            var obj = requestBrowse(lists.items[i].abPath);
+            showList(obj.data);
+            showPath(obj.absolutePath);
+            break;
+        }
+    }
+};
 $("#submit").click(function () {
     var checkboxes = document.getElementsByName("checks");
     var value = null;

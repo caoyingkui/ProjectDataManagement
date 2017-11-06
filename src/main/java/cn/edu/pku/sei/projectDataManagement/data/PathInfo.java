@@ -143,13 +143,13 @@ public class PathInfo {
             if (size >= TB) throw new FileSizeTooLarge();
             else if (size >= GB) {
                 result = (double) size / GB;
-                resultString = format.format(result);
+                resultString = format.format(result) + "GB";
             } else if (size >= MB) {
                 result = (double) size / MB;
-                resultString = format.format(result);
+                resultString = format.format(result) + "MB";
             } else if (size >= KB) {
                 result = (double) size / KB;
-                resultString = format.format(result);
+                resultString = format.format(result) + "KB";
             } else if (size >= 0) {
                 resultString = "1KB";
             } else {
