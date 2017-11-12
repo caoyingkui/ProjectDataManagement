@@ -205,7 +205,7 @@ function sidebutton(text){
         sidebar.isSources = true;
         sidebar.isProjects = false;
 
-        obj = requestBrowse("\\dataType");
+        obj = requestBrowse("\\dataType\\");
         path.paths = [];
         path.cur = "Sources";
         showList(obj.data);
