@@ -31,6 +31,10 @@ public class PathInfo {
         return dir;
     }
 
+    public void setDir(String value){
+        this.dir = value;
+    }
+
     public PathType getType(){
         return type;
     }
@@ -53,7 +57,23 @@ public class PathInfo {
     //endregion
 
     public static void main(String[] args){
-        ;
+        File file = new File("E:\\CrawlData\\Apache");
+        show(file);
+    }
+
+    public static void show(File file){
+        PathInfo Info = new PathInfo(file , "dataType");
+        System.out.println(Info.toJSONObject().toString());
+
+        File[] files = file.listFiles();
+        for(File f : files){
+            if(f.isDirectory()){
+                show(f);
+            }else if(f.isFile()){
+                Info = new PathInfo(f , "dataType");
+                //System.out.println(Info.toJSONObject().toString());
+            }
+        }
     }
 
     public PathInfo(File file , String type){
@@ -67,10 +87,15 @@ public class PathInfo {
             String path = file.getAbsolutePath();
             if(type.compareTo("projects") == 0){
                 this.dir = Directory.realPathToVirtualPath_projectFirst(path);
+                if(this.dir == null)
+                    status = false;
             }else if(type.compareTo("dataType") == 0){
                 this.dir = Directory.realPathToVirtualPath_dataTypeFirst(path);
+                if(this.dir == null)
+                    status = false;
             }else{
-                this.dir = ""; // this case should not occur.
+                this.dir = null; // this case should not occur.
+                status = false;
             }
             //endregion
             //region<set the type of this path , if the path is file then also set the data size >
@@ -108,8 +133,10 @@ public class PathInfo {
                     this.metaInfo = new EmailInfo(path , pathLevel);
                     break;
                 }
+                case NULL:{
+                    this.metaInfo = new MetaInfo(path , pathLevel);
+                }
             }
-            this.metaInfo = new MetaInfo(path , PathLevel.NULL);
             //endregion <set the metaInfo of this path>
         }catch (Exception e){
             e.printStackTrace();
@@ -125,13 +152,13 @@ public class PathInfo {
             if (size >= TB) throw new FileSizeTooLarge();
             else if (size >= GB) {
                 result = (double) size / GB;
-                resultString = format.format(result);
+                resultString = format.format(result) + "GB";
             } else if (size >= MB) {
                 result = (double) size / MB;
-                resultString = format.format(result);
+                resultString = format.format(result) + "MB";
             } else if (size >= KB) {
                 result = (double) size / KB;
-                resultString = format.format(result);
+                resultString = format.format(result) + "KB";
             } else if (size >= 0) {
                 resultString = "1KB";
             } else {

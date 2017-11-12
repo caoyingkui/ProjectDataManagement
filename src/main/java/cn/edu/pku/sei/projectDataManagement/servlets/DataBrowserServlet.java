@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -54,7 +55,7 @@ public class DataBrowserServlet extends HttpServlet {
             result = browseDirectory(request.getParameter("directory"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
-        }else if(requestType.compareTo("searchDiretory") == 0){
+        }else if(requestType.compareTo("searchDirectory") == 0){
             result = searchDirectory(request.getParameter("query"));
             response.setContentType("application/json");
             response.getWriter().print(result.toString());
@@ -63,20 +64,35 @@ public class DataBrowserServlet extends HttpServlet {
 
     private JSONObject browseDirectory(String virtualPath){
         JSONObject result = new JSONObject();
-        String realPath = Directory.virtualPathToRealPath(virtualPath);
-        File temp = new File(realPath);
-        if(  (temp.exists() && temp.isDirectory()) ||  //is a directory
-                !temp.exists() //  \projects\lucene , can not map to a real path , but it is valid
-                ){
-            List<File> files = Directory.getSubDirByVirtualPath(virtualPath);
+
+        if(virtualPath.compareTo("\\projects") == 0){
+            List<File> files = Directory.findAllProjects();
             List<PathInfo> pathInfos = new ArrayList<PathInfo>();
-            String type = virtualPath.startsWith("\\projects") ? "projects" : "dataType";
             for(File file : files){
-                pathInfos.add(new PathInfo(file , type));
+                PathInfo info = new PathInfo(file , "projects");
+                String dir = info.getDir();
+                String path[] = dir.split("\\\\");
+                info.setDir("\\" + path[1] + "\\" + path[3]);
+                pathInfos.add(info);
+
             }
             result = PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "Directory" , virtualPath);
         }else{
-            result = null;
+            String realPath = Directory.virtualPathToRealPath(virtualPath);
+            File temp = new File(realPath);
+            if(  (  !temp.exists() || //  \projects\lucene , can not map to a real path , but it is valid
+                    temp.exists() && temp.isDirectory()) //is a directory
+                    ){
+                List<File> files = Directory.getSubDirByVirtualPath(virtualPath);
+                List<PathInfo> pathInfos = new ArrayList<PathInfo>();
+                String type = virtualPath.startsWith("\\projects") ? "projects" : "dataType";
+                for(File file : files){
+                    pathInfos.add(new PathInfo(file , type));
+                }
+                result = PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "Directory" , virtualPath);
+            }else{
+                result = null;
+            }
         }
         return result;
     }
@@ -118,11 +134,13 @@ public class DataBrowserServlet extends HttpServlet {
             return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
         }else if(dataTypeSet.size() == 0 && projectSet.size() > 0){
             for(String project : projectSet){
-                virtualPath = "\\projects\\" + project;
-                realPath = Directory.virtualPathToRealPath(virtualPath);
-                File file = new File(realPath);
-                if(file.exists()){
-                    pathInfos.add(new PathInfo(file , "projects"));
+                for(String type : dataTypes.keySet()){
+                    virtualPath = "\\projects\\" + project + "\\" + dataTypes.get(type)[1];
+                    realPath = Directory.virtualPathToRealPath(virtualPath);
+                    File file = new File(realPath);
+                    if(file.exists()){
+                        pathInfos.add(new PathInfo(file , "projects"));
+                    }
                 }
             }
             return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "searchResult" , null);
