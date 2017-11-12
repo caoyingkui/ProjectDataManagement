@@ -61,7 +61,7 @@
 
             <div class="panel-group" id="lists">
 
-                <doc v-for="item in items" v-bind="item"></doc>
+                <doc v-for="item in items" v-bind="item" v-bind:show-path="isSearch"></doc>
 
             </div>
 

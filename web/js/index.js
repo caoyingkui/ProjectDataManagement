@@ -73,17 +73,20 @@ var lists = new Vue({
                 size : '50M',
                 isFolder : true,
             }
-        ]
+        ],
+        isSearch: false
+
 
     },
     components: {
         doc: {
-            props: ['headId', 'abPath', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size', 'isFolder'],
+            props: ['headId', 'abPath', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size', 'isFolder', 'showPath'],
             template: '<div class="panel panel-default" v-if=isFolder>\n' +
             '                    <div class="panel-heading" :id="headId">\n' +
             '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
             '                        <span class="glyphicon glyphicon-folder-open" style="padding-right: 10px"></span>\n' +
             '                        <span class="panel-title tran-hand nexthref" style="width:100px" onclick="nexthref(this.textContent)">{{ name }}</span>\n' +
+            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px" v-if=showPath>{{ abPath }}</span>' +
             '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{ size }}</span>' +
             '                        <div class="navbar-right chevron-down" >\n' +
             '                            <span class="glyphicon glyphicon-chevron-down tran-hand" data-toggle="collapse" data-parent="#lists" :href="collapseHref"></span>\n' +
@@ -101,6 +104,7 @@ var lists = new Vue({
             '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
             '                        <span class="glyphicon glyphicon-file" style="padding-right: 10px"></span>\n' +
             '                        <span class="panel-title" style="width:100px">{{ name }}</span>\n' +
+            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px" v-if=showPath>{{ abPath }}</span>' +
             '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{ size }}</span>' +
             '                        <div class="navbar-right chevron-down" >\n' +
             '                            <span class="glyphicon glyphicon-chevron-down tran-hand" data-toggle="collapse" data-parent="#lists" :href="collapseHref"></span>\n' +
@@ -178,6 +182,8 @@ function showList(arr) {
         }
         lists.items.push(tmp);
     }
+    lists.isSearch=false;
+
 
 }
 
@@ -297,6 +303,8 @@ function search () {
             } else if (data.dataType == "searchResult") {
                 showList(data.data);
                 path.cur = "search: " + searchStr;
+                lists.isSearch=true;
+
             }
         }
     });
