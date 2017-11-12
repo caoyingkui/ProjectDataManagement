@@ -72,7 +72,8 @@ public class DataBrowserServlet extends HttpServlet {
                 PathInfo info = new PathInfo(file , "projects");
                 String dir = info.getDir();
                 String path[] = dir.split("\\\\");
-                info.setDir("\\" + path[1] + "\\" + path[3]);
+                info.setDir("\\" + path[1] + "\\" + path[2]);
+                info.setFileName(path[2]);
                 pathInfos.add(info);
 
             }
@@ -105,12 +106,13 @@ public class DataBrowserServlet extends HttpServlet {
 
         //region <get all the data types and projects which are contained in the query>
         for(String parameter : parameters){
-            if(containsDataType(parameter))
-                dataTypeSet.add(parameter);
+            String similarType = getSimilarType(parameter);
+            if(similarType.length() > 0)
+                dataTypeSet.add(similarType);
 
-            if(containsProject(parameter))
-                projectSet.add(parameter);
-
+            List<String> similarProjects = getSimilarProjects(parameter);
+            if(similarProjects.size() > 0)
+                projectSet.addAll(similarProjects);
         }
         //endregion <get all the dataType and projects which are contained in the query>
 
@@ -135,7 +137,7 @@ public class DataBrowserServlet extends HttpServlet {
         }else if(dataTypeSet.size() == 0 && projectSet.size() > 0){
             for(String project : projectSet){
                 for(String type : dataTypes.keySet()){
-                    virtualPath = "\\projects\\" + project + "\\" + dataTypes.get(type)[1];
+                    virtualPath = "\\projects\\" + project + "\\" + type;
                     realPath = Directory.virtualPathToRealPath(virtualPath);
                     File file = new File(realPath);
                     if(file.exists()){
@@ -166,14 +168,24 @@ public class DataBrowserServlet extends HttpServlet {
         }
     }
 
-    private static boolean containsDataType(String type){
-        type = type.toLowerCase();
-        return dataTypes.containsKey(type);
+    private static String getSimilarType(String type){
+        String result = "";
+        for(String similarType : dataTypes.keySet()){
+            if(similarType.toLowerCase().contains(type.trim().toLowerCase())){
+                result = similarType;
+            }
+        }
+        return result;
     }
 
-    private static boolean containsProject(String project){
-        project = project.toLowerCase();
-        return projects.contains(project);
+    private static List<String> getSimilarProjects(String project){
+        List<String> result = new ArrayList<String>();
+        for(String similarProject : projects){
+            if(similarProject.toLowerCase().contains(project.trim().toLowerCase())){
+                result.add(similarProject);
+            }
+        }
+        return result;
     }
 
     private static void initialize(){

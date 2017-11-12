@@ -43,6 +43,10 @@ public class PathInfo {
         return fileName;
     }
 
+    public void setFileName(String value){
+        this.fileName = value;
+    }
+
     public String getDataSize(){
         return dataSize;
     }
@@ -110,7 +114,7 @@ public class PathInfo {
             }
             //endregion
             //region <set the file name of this path>
-            this.fileName = file.getName();
+            this.fileName = this.dir.substring(this.dir.lastIndexOf("\\") + 1);
 
             //endregion
             //region <set the metaInfo of this path>
