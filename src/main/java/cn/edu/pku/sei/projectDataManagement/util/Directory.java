@@ -97,7 +97,7 @@ public class Directory {
                 }else if(paths.length > 2){
                     // path[1]: projectName; path[2]: category
                     result = root ;
-                    result += ("\\" + paths[2]);
+                    result += ("\\" + dataTypes.get(paths[2])[1]); // 可能会导致出错。
                     result += ("\\" + paths[1]);
                     for(int i = 3 ; i < paths.length ; i ++){
                         result += ("\\" + paths[i]);
@@ -134,16 +134,33 @@ public class Directory {
         String oriPath = realPath;
         try {
             if(isRealPathValid(realPath)) {
-                realPath = realPath.replace(root + "\\" , "");
                 String[] paths = realPath.split("\\\\");
                 if(paths.length < 2) throw new RealPathIllegal(oriPath);
-                // paths[0]: category ; paths[1]: project
-                result = "\\projects";
-                result += "\\" + paths[1];
-                result += "\\" + paths[0];
-                for(int i = 2 ; i < paths.length ; i++ ){
-                    result += ("\\" + paths[i]);
+
+                String dataType = "";
+
+
+                for(String type : dataTypes.keySet()){
+                    String root = dataTypes.get(type)[0];
+                    if(realPath.startsWith(root)){
+                        dataType = type;
+                        break;
+                    }
                 }
+
+                if(dataType.length() > 0){
+                    String root = dataTypes.get(dataType)[0];
+                    paths = realPath.replace(root + "\\" , "").split("\\\\");
+                    result = "\\projects";
+                    result += ( "\\" + paths[0] );
+                    result += ("\\" + dataType);
+                    for(int i = 1; i < paths.length ; i++) {
+                        result += ("\\" + paths[i]);
+                    }
+                }else{
+                    result = "";
+                }
+
             }else{
                 throw new RealPathIllegal(realPath);
             }
@@ -164,7 +181,7 @@ public class Directory {
                 throw new RealPathIllegal(oriPath);
             }
         }catch(RealPathIllegal e){
-            e.printStackTrace();
+            //e.printStackTrace();
             result = null;
         }
         return result;
@@ -190,8 +207,11 @@ public class Directory {
         String[] paths = virtualPath.substring(1).split("\\\\");
         try{
             if(paths[0].compareTo("projects") == 0){
-                // this is a special case
-                if(paths.length == 2){
+
+                if(paths.length == 1){// this is a special case
+                    result = findAllProjects();
+                }
+                else if(paths.length == 2){// this is a special case
                     result = findAllDataTypeForAProject(paths[1]);
                 }else if(paths.length > 2){
                     String realPath = virtualPathToRealPath(virtualPath);
@@ -225,12 +245,33 @@ public class Directory {
 
     }
 
+    public static List<File> findAllProjects(){
+        List<File> result = new ArrayList<File>();
+        if(dataTypes == null)
+            return null ;
+        for(String type : dataTypes.keySet()){
+            String root = dataTypes.get(type)[0]; // value[0] stores the root of the type
+            File rootFile = new File(root);
+            if(rootFile.exists() && rootFile.isDirectory()){
+                File[] fileList = rootFile.listFiles();
+
+                for(File subFile : fileList){
+                    if(subFile.isDirectory()){
+                        result.add(subFile);
+                    }
+                }
+
+            }
+        }
+        return result;
+    }
+
     private static List<File> findAllDataTypeForAProject(String project){
         List<File> result = new ArrayList<File>();
         String filePath ;
 
         for(String type : dataTypes.keySet()){
-            filePath = dataTypes.get(type)[1] + "\\" + project;
+            filePath = dataTypes.get(type)[0] + "\\" + project;
             File file = new File(filePath);
             if(file.exists()){
                 result.add(file);

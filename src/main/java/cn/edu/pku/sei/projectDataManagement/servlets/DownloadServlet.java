@@ -30,14 +30,11 @@ public class DownloadServlet extends HttpServlet{
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<File> files = new ArrayList<File>();
-        files.add(new File("D:\\BaiduNetdiskDownload\\1.rar"));
-        files.add(new File("D:\\BaiduNetdiskDownload\\2.rar"));
         /*zipFile(resp , files , "test");*/
         String requestType = request.getParameter("requestType");
-        if(true || requestType.compareTo("downloadFiles") == 0){
-            //String[] filePaths = request.getParameter("filePaths").split("|");
-            ////List<File> files = getFiles(filePaths);
+        if(requestType.compareTo("downloadFiles") == 0){
+            String[] filePaths = request.getParameter("filePaths").split("\\|");
+            List<File> files = getFiles(filePaths);
             if(files == null){
                 //System.out.println("There is no files will be downloaded!(the filePaths=" + filePaths + ")");
             }else if(files.size() == 1 && files.get(0).isFile()){

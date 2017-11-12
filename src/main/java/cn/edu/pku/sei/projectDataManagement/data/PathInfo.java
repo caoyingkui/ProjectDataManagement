@@ -31,6 +31,10 @@ public class PathInfo {
         return dir;
     }
 
+    public void setDir(String value){
+        this.dir = value;
+    }
+
     public PathType getType(){
         return type;
     }
@@ -83,10 +87,15 @@ public class PathInfo {
             String path = file.getAbsolutePath();
             if(type.compareTo("projects") == 0){
                 this.dir = Directory.realPathToVirtualPath_projectFirst(path);
+                if(this.dir == null)
+                    status = false;
             }else if(type.compareTo("dataType") == 0){
                 this.dir = Directory.realPathToVirtualPath_dataTypeFirst(path);
+                if(this.dir == null)
+                    status = false;
             }else{
-                this.dir = ""; // this case should not occur.
+                this.dir = null; // this case should not occur.
+                status = false;
             }
             //endregion
             //region<set the type of this path , if the path is file then also set the data size >

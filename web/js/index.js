@@ -244,7 +244,7 @@ function prevhref(name){
 function nexthref(name) {
     for (var i = 0; i < lists.items.length; i++) {
         if (name == lists.items[i].name) {
-            var name = requestBrowse(lists.items[i].abPath);
+            var obj = requestBrowse(lists.items[i].abPath);
             showList(obj.data);
             showPath(obj.absolutePath);
             break;
@@ -259,16 +259,18 @@ function submit() {
     for (var i = 0; i < checkboxes.length; i++){
         if (checkboxes[i].checked) {
             if (value == null) {
-                value = checkboxes[i].value.replace(/\\/g,"%5C");
+                var tmp = checkboxes[i].value;
+                value = tmp.replace(/\\/g,"%5C");
             } else {
                 value = value + "%7C" + checkboxes[i].value.replace(/\\/g,"%5C");
             }
         }
     }
+    alert(value);
     if (value == null) {
         alert("No file chosen.");
     } else {
-        window.open('Download?reqeustType=downloadFiles&filePaths='+value, '_blank');
+        window.open('Download?requestType=downloadFiles&filePaths='+value, '_blank');
     }
 
 };
@@ -281,7 +283,7 @@ function search () {
     };
     $.ajax({
         type: "Post",
-        url: "dataSearch",
+        url: "dataBrowser",
         data: para,
         async: false,
         success: function (data) {
