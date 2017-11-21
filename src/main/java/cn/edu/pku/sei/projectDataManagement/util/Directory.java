@@ -365,10 +365,10 @@ public class Directory {
             }
             //endregion<MainSite>
             //region <MailBox>
-            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.MboxCrawler")){
-                path = path.replace("cn.edu.pku.EOSCN.crawler.MboxCrawler" , "");
-                Pattern projectPattern = Pattern.compile("[^\\\\]+]");
-                Pattern mailBoxPattern = Pattern.compile("[^\\\\]+[\\\\][^\\\\]");
+            else if(path.startsWith("\\cn.edu.pku.EOSCN.crawler.MboxCrawler")){
+                path = path.replace("\\cn.edu.pku.EOSCN.crawler.MboxCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[\\\\][^\\\\]+");
+                Pattern mailBoxPattern = Pattern.compile("[\\\\][^\\\\]+[\\\\][^\\\\]+");
                 if(path.length() == 0)
                     return PathLevel.EMAIL_ROOT;
                 else if(projectPattern.matcher(path).find())

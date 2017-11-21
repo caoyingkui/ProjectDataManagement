@@ -182,6 +182,10 @@ public class PathInfo {
         if(status){
             result.put("dir" , this.dir);
             result.put("type" , this.type.toString().toLowerCase());
+            if(this.fileName.compareTo("tuscany") == 0){
+                int i = 0;
+                i ++ ;
+            }
             result.put("fileName" , this.fileName);
             result.put("dataSize" , this.dataSize );
             result.put("metaInfo" , this.metaInfo.toJSONObject());
@@ -206,8 +210,11 @@ public class PathInfo {
                 JSONObject temp = new JSONObject() ;
                 for(PathInfo pathInfo : pathInfos){
                     temp = pathInfo.toJSONObject();
-                    if(temp != null)
+
+                    if(temp != null) {
                         array.put(pathInfo.toJSONObject());
+                        System.out.println(temp.get("fileName"));
+                    }
                 }
                 result.put("data" , array);
             }

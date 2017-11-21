@@ -22,6 +22,16 @@ public class EmailInfo extends MetaInfo{
         return 0;
     }
 
+    @Override
+    public JSONObject toJSONObject() {
+        switch (this.pathLevel){
+            case EMAIL_ROOT: return getMetaInfo_ROOT();
+            case EMAIL_PROJECT: return getMetaInfo_PROJECT();
+            case EMAIL_MAILBOX: return getMetaInfo_MailBox();
+        }
+        return null;
+    }
+
     private  JSONObject getMetaInfo_ROOT(){
         JSONObject result = new JSONObject();
         result.put("pathLevel" , PathLevel.EMAIL_ROOT.toString());
@@ -66,7 +76,13 @@ public class EmailInfo extends MetaInfo{
         Map<String , Integer> result = new HashMap<String, Integer>();
         File[] files = new File(path).listFiles();
         for(File f : files){
-            result.put(f.getName() , getMailAmount(f.getAbsolutePath()));
+            if(f.isDirectory()) {
+                try {
+                    result.put(f.getName(), getMailAmount(f.getAbsolutePath()));
+                }catch(Exception e){
+                    ;
+                }
+            }
         }
         return result;
     }
