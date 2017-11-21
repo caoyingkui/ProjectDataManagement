@@ -184,6 +184,11 @@ function showList(arr) {
     }
     lists.isSearch=false;
 
+    var checkboxes = document.getElementsByName("checks");
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked)
+            checkboxes[i].checked = false;
+    }
 
 }
 
