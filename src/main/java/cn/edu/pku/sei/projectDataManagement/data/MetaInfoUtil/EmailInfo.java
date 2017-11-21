@@ -19,7 +19,8 @@ public class EmailInfo extends MetaInfo{
 
     @Override
     protected int getProjectAmount() {
-        return 0;
+        File file = new File(path);
+        return file.listFiles().length;
     }
 
     @Override

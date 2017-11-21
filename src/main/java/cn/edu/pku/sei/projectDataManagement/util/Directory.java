@@ -333,19 +333,19 @@ public class Directory {
         if( file.exists() && file.isDirectory()){
             path = path.replace(root , "");
             //region <Bugzilla>
-            if(path.startsWith("cn.edu.pku.EOSCN.crawler.BugzillaCrawler")){
-                path = path.replace("cn.edu.pku.EOSCN.crawler.BugzillaCrawler" , "");
-                Pattern projectPattern = Pattern.compile("[^\\\\]+");
+            if(path.startsWith("\\cn.edu.pku.EOSCN.crawler.BugzillaCrawler")){
+                path = path.replace("\\cn.edu.pku.EOSCN.crawler.BugzillaCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[\\\\][^\\\\]+");
                 if(path.length() == 0)
                     result = PathLevel.BUGZILLA_ROOT;
                 else if(projectPattern.matcher(path).find())
                     result = PathLevel.BUGZILLA_PROJECT;
             }//endregion <Bugzilla>
             //region <Git>
-            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.GitCrawler")){
-                path = path.replace("cn.edu.pku.EOSCN.crawler.GitCrawler" , "");
-                Pattern projectPattern = Pattern.compile("[^\\\\]+");
-                Pattern monthPattern = Pattern.compile("([^\\\\]+\\\\){2}[0-9]{4}-[0-9]{2}");
+            else if(path.startsWith("\\cn.edu.pku.EOSCN.crawler.GitCrawler")){
+                path = path.replace("\\cn.edu.pku.EOSCN.crawler.GitCrawler" , "");
+                Pattern projectPattern = Pattern.compile("[\\\\][^\\\\]+");
+                Pattern monthPattern = Pattern.compile("([\\\\][^\\\\]+){2}[\\\\][0-9]{4}-[0-9]{2}");
                 if(path.length() == 0)
                     result = PathLevel.GIT_ROOT;
                 else if(projectPattern.matcher(path).find())
@@ -355,12 +355,12 @@ public class Directory {
             }
             //endregion <Git>
             //region <Jira>
-            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.JiraIssueCrawler")){
+            else if(path.startsWith("\\cn.edu.pku.EOSCN.crawler.JiraIssueCrawler")){
 
             }
             //endregion<Jira>
             //region <MainSite>
-            else if(path.startsWith("cn.edu.pku.EOSCN.crawler.MainSiteCrawler")){
+            else if(path.startsWith("\\cn.edu.pku.EOSCN.crawler.MainSiteCrawler")){
 
             }
             //endregion<MainSite>
