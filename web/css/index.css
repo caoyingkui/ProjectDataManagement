@@ -18,9 +18,3 @@ body {
     text-decoration: underline;
     color: #23527c;
 }
-
-.float-button {
-    position: fixed;
-    bottom: 90px;
-    right: 10%;
-}

@@ -18,7 +18,7 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <span class="navbar-brand">Download</span>
+            <span class="navbar-brand">PKU SEI </span>
         </div>
 
         <div id="labels">
@@ -39,29 +39,61 @@
     </div>
 </nav>
 
+
+
+
+
 <div class="container">
 
     <div class="row">
 
+        <div class="col-sm-7" style="float:left">
 
-
-        <div class="col-sm-9">
-
-            <ol class="breadcrumb" id="path">
+            <ol class="breadcrumb" id="path" style="font-size: medium">
+                <span>Current Path: </span>
                 <drc v-for="path in paths" :name="path"></drc>
                 <cur :name="cur"></cur>
             </ol>
 
 
-            <div class="panel-group" id="lists">
 
-                <doc v-for="item in items" v-bind="item" v-bind:show-path="isSearch"></doc>
+            <table class="table table-hover table-bordered" id="lists">
+                <tr is="doc" v-for="item in items" v-bind="item" v-bind:show-path="isSearch"></tr>
+            </table>
 
-            </div>
+            <nav id="pages">
+                <ul class="pagination pagination-sm">
+                    <page v-for="single in pages" v-bind="single"></page>
+                </ul>
 
-            <input class="btn btn-primary float-button" type="button" value="Download" onclick="submit()">
+                <div class="navbar-right" style="margin: 20px 0">
+                    <input class="btn btn-primary" type="button" value="Download" onclick="download()">
+                </div>
+
+
+
+            </nav>
+
+
+
 
         </div>
+
+    <div style="float:left" class="col-sm-4">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+            <span class="panel-title"> detail information </span>
+            </div>
+
+            <div class="panel-body" style="height: 200px">
+                <span>test</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
     </div>
 
 
