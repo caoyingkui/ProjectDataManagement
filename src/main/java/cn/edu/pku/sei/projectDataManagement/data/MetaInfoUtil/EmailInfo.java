@@ -60,7 +60,7 @@ public class EmailInfo extends MetaInfo{
         }
 
         result.put("mailBoxAmount" , mailBox.length());
-        result.put("mailBoxList" , mailBox.toString());
+        result.put("mailBoxList" , mailBox);
 
         return result;
     }

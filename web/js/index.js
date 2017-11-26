@@ -1,5 +1,5 @@
 var sidebar = new Vue({
-    el : '#sidebar',
+    el : '#labels',
     data: {
         isSources: true,
         isProjects: false
@@ -94,8 +94,7 @@ var lists = new Vue({
             '                        \n' +
             '                    </div>\n' +
             '                    <div :id="collapseId" class="panel-collapse collapse">\n' +
-            '                        <div class="panel-body">\n' +
-            '                            {{ detail }}\n' +
+            '                        <div class="panel-body" v-html="detail">\n' +
             '                        </div>\n' +
             '                    </div>\n' +
             '         </div>\n' +
@@ -112,8 +111,7 @@ var lists = new Vue({
             '                        \n' +
             '                    </div>\n' +
             '                    <div :id="collapseId" class="panel-collapse collapse">\n' +
-            '                        <div class="panel-body">\n' +
-            '                            {{ detail }}\n' +
+            '                        <div class="panel-body" v-html="detail">\n' +
             '                        </div>\n' +
             '                    </div>\n' +
             '          </div>'
@@ -172,7 +170,8 @@ function showList(arr) {
         tmp.abPath = arr[i].dir;
         tmp.name = arr[i].fileName;
         tmp.size = arr[i].dataSize;
-        tmp.detail = JSON.stringify(arr[i].metaInfo);
+        //tmp.detail = JSON.stringify(arr[i].metaInfo);
+        tmp.detail = change(arr[i].metaInfo);
         tmp.collapseHref = "#collapse" + i;
         tmp.collapseId = "collapse" + i;
         if (arr[i].type == "directory") {
@@ -190,16 +189,37 @@ function showList(arr) {
             checkboxes[i].checked = false;
     }
 
+
+}
+function change(obj) {
+    var result="<pre>";
+    for(var item in obj){
+        if(typeof obj[item] == 'object') {
+            result += item + ":\n";
+
+            var inner = obj[item];
+            for(var i = 0; i < inner.length; i++){
+                for(var ikey in inner[i]) {
+                    result += "\t" + ikey + ":" + inner[i][ikey] + ",";
+                }
+                result += "\n";
+            }
+
+        } else {
+            result += item + ":" + obj[item] + "\n";
+        }
+
+    }
+
+    return result + "</pre>";
 }
 
 $(document).ready(function(){
 
-    // sidebar.isSources = true;
-    // sidebar.isProjects = false;
-    // obj = requestBrowse("\\dataType");
-    // path.paths = [];
-    // path.cur = "dataType";
-    // showList(obj.data);
+    obj = requestBrowse("\\dataType\\");
+    path.paths = [];
+    path.cur = "Sources";
+    showList(obj.data);
 
 });
 
