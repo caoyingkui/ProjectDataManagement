@@ -2,10 +2,20 @@ package cn.edu.pku.sei.projectDataManagement.util;
 
 import cn.edu.pku.sei.projectDataManagement.data.MetaInfoUtil.PathLevel;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import cn.edu.pku.sei.projectDataManagement.data.PathInfo;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+
 
 /**
  * Created by oliver on 2017/10/15.
@@ -13,13 +23,42 @@ import java.util.regex.Pattern;
 public class Directory {
     private static String root = "";
     private static Map<String , String[]> dataTypes;
+    public static Map<String , Map<String, String>> dataTypePaths;
     private static Set<String> projects;
+
+    public static Map<String, String> soPaths = new HashMap<String, String>();
+    public static Map<String, String> gitPaths = new HashMap<String, String>();
+    public static Map<String, String> emailPaths = new HashMap<String, String>();
+    public static Map<String, String> codePaths = new HashMap<String, String>();
+    public static Map<String, String> bugPaths = new HashMap<String, String>();
+
+    private static Map<String , String> realPathToVirtualPath = new HashMap<String, String>();
+
     static{
+
+
         ResourceBundle bundle = ResourceBundle.getBundle("configuration");
         initializeDataTypesMap();
         initializeProjectsSet();
+        initializeDataTypesPathsMap();
         root = bundle.getString("DataRoot");
+
+        for(String dataType : dataTypes.keySet()){
+            Map<String , String> dataTypePath = dataTypePaths.get(dataType);
+            String baseDir = dataTypes.get(dataType)[0];
+            for(String project : dataTypePath.keySet()){
+                File file = new File(baseDir + "\\" + dataTypePath.get(project));
+                if(!file.exists()){
+                    System.out.print("-");
+                    System.out.println(baseDir + "\\" + dataTypePath.get(project));
+                }else
+                    System.out.println("+");
+
+            }
+        }
+
     }
+
 
     public static Map<String ,String[]> getDataTypes(){
         return dataTypes;
@@ -52,8 +91,9 @@ public class Directory {
     }
 
     public static void main(String[] args){
+        Directory dir = new Directory();
 
-        File file = new File("D:\\projectddddDataManagement");
+        /*File file = new File("D:\\projectddddDataManagement");
         test(file);
         List<File> files;
         for(String path:virPaths){
@@ -67,7 +107,7 @@ public class Directory {
             }
             int i = 0;
             i ++ ;
-        }
+        }*/
     }
 
     //region <path conversion>
@@ -91,6 +131,19 @@ public class Directory {
 
         try {
             if(paths[0].compareTo("projects") == 0){
+                if(paths.length <= 2){ // "\\projects" or "\\projects\\project"
+                    result = "\\" + virtualPath ;
+                }else if(paths.length > 2){
+                    String project = paths[1];
+                    String dataType = paths[2];
+                    result = dataTypes.get(dataType)[0] + "\\" + dataTypePaths.get(dataType).get(project);
+                    for(int i = 3 ; i < paths.length ; i ++){
+                        result += ("\\" + paths[i]);
+                    }
+                }
+
+                //region <old>
+                /*
                 // this is a special case which return value is not a real path
                 if(paths.length == 2){
                     result = virtualPath;
@@ -105,6 +158,8 @@ public class Directory {
                 }else{
                     throw new VirtualPathIllegal(oriPath);
                 }
+                */
+                //endregion <old>
             }else if(paths[0].compareTo("dataType") == 0){
                 result = root;
                 for(int i = 1 ; i < paths.length ; i++){
@@ -131,9 +186,34 @@ public class Directory {
      */
     public static String realPathToVirtualPath_projectFirst(String realPath){
         String result = "";
-        String oriPath = realPath;
-        try {
+        for(String type : dataTypes.keySet()){
+            String dir = dataTypes.get(type)[0];
+            if(realPath.startsWith(dir)) {
+                realPath = realPath.substring((dir + "\\").length());
+                String[] paths = realPath.split("\\\\");
+                if(paths.length == 0){
+                    new Exception().printStackTrace();
+                }else{
+                    String temp = paths[0];
+                    Map<String , String> dataTypePath = dataTypePaths.get(type);
+                    for(String project : dataTypePath.keySet()){
+                        if(dataTypePath.get(project).compareTo(temp) == 0){
+                            result = "\\projects\\" + project + "\\" + type;
+                            for(int i = 1 ; i < paths.length ; i ++)
+                                result += ("\\" + paths[i]);
+                            break;
+                        }
+                    }
+
+                }
+                break;
+            }
+        }
+        return result;
+        // region <old>
+        /*try {
             if(isRealPathValid(realPath)) {
+                //region <old>
                 String[] paths = realPath.split("\\\\");
                 if(paths.length < 2) throw new RealPathIllegal(oriPath);
 
@@ -160,6 +240,8 @@ public class Directory {
                 }else{
                     result = "";
                 }
+                // endregion <old>
+
 
             }else{
                 throw new RealPathIllegal(realPath);
@@ -168,7 +250,8 @@ public class Directory {
             e.printStackTrace();
             result = null;
         }
-        return result;
+        return result;*/
+        //endregion <old>
     }
 
     public static String realPathToVirtualPath_dataTypeFirst(String realPath){
@@ -208,6 +291,7 @@ public class Directory {
         try{
             if(paths[0].compareTo("projects") == 0){
 
+
                 if(paths.length == 1){// this is a special case
                     result = findAllProjects();
                 }
@@ -215,10 +299,12 @@ public class Directory {
                     result = findAllDataTypeForAProject(paths[1]);
                 }else if(paths.length > 2){
                     String realPath = virtualPathToRealPath(virtualPath);
-                    File file = new File(realPath);
+
+                    File file = new File("\\\\162.105.88.12\\F:\\Tomcat 8.0\\logs");//realPath);
                     if(file.isDirectory()){
                         result = new ArrayList<File>(Arrays.asList(file.listFiles()));
                     }else{
+                        System.out.println(file.getAbsolutePath() + file.exists());
                         throw new PathNotDirectory(file.getAbsolutePath());
                     }
                 }
@@ -236,7 +322,7 @@ public class Directory {
 
         }catch(VirtualPathIllegal e){
             e.printStackTrace();
-        }catch(Exception e){
+        }catch(Throwable e){
             e.printStackTrace();
         }
         finally{
@@ -305,10 +391,25 @@ public class Directory {
     }
 
     private static void initializeProjectsSet(){
-        // TODO
         if(dataTypes == null)
             return ;
         projects = new HashSet<String>();
+        try{
+            FileInputStream fis = new FileInputStream(new File("E:\\Intellij workspace\\ProjectDataManagement\\projectPaths.xlsx"));
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            int rows = sheet.getLastRowNum();
+            for(int i = 1 ; i <= rows; i ++){
+                String project = sheet.getRow(i).getCell(0).toString();
+                projects.add(project);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+
+        //region <old>
+        /*
         for(String type : dataTypes.keySet()){
             String root = dataTypes.get(type)[0]; // value[0] stores the root of the type
             File rootFile = new File(root);
@@ -322,6 +423,43 @@ public class Directory {
                 }
 
             }
+        }
+        */
+        //endregion <old>
+    }
+
+    private static void initializeDataTypesPathsMap(){
+        try{
+            Map<Integer , String> type_column = new HashMap<>();
+            FileInputStream fis = new FileInputStream("E:\\Intellij workspace\\ProjectDataManagement\\projectPaths.xlsx");
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            XSSFRow firstRow = sheet.getRow(0);
+            int columnCount = firstRow.getPhysicalNumberOfCells();
+            for(int i = 1 ; i < columnCount ; i ++){
+                type_column.put(i , firstRow.getCell(i).toString());
+            }
+
+            dataTypePaths = new HashMap<>();
+            for(String type : dataTypes.keySet()){
+                dataTypePaths.put(type, new HashMap<String , String>());
+            }
+
+            int rows = sheet.getLastRowNum();
+            for(int i = 1 ; i <= rows ; i ++){
+                XSSFRow row = sheet.getRow(i);
+                String project = row.getCell(0).toString();
+                for(int j = 1 ; j < columnCount; j ++){
+                    XSSFCell cell = row.getCell(j);
+                    if(cell != null) {
+                        dataTypePaths.get(type_column.get(j))
+                                .put(project , cell.toString());
+                    }
+                }
+            }
+
+        }catch(Exception e ){
+            e.printStackTrace();
         }
     }
 

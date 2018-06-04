@@ -1,6 +1,7 @@
 package cn.edu.pku.sei.projectDataManagement.servlets;
 
 import cn.edu.pku.sei.projectDataManagement.data.PathInfo;
+import cn.edu.pku.sei.projectDataManagement.data.PathType;
 import cn.edu.pku.sei.projectDataManagement.util.Directory;
 import org.json.JSONObject;
 
@@ -25,6 +26,8 @@ public class DataBrowserServlet extends HttpServlet {
     static Set<String> projects;
     static{
         initialize();
+        DownloadServlet ds = new DownloadServlet();
+        DownloadServlet.test t = ds.new test();
     }
 
     public static void main(String[] args) throws IOException {
@@ -35,6 +38,7 @@ public class DataBrowserServlet extends HttpServlet {
             JSONObject result = servlet.searchDirectory(query);
             System.out.println(result.toString());
         }
+
 
 
     }
@@ -63,39 +67,50 @@ public class DataBrowserServlet extends HttpServlet {
     }
 
     private JSONObject browseDirectory(String virtualPath){
-        JSONObject result = new JSONObject();
+        List<PathInfo> pathInfos = new ArrayList<PathInfo>();
+        if(virtualPath.startsWith("\\projects")){
+            String[] args = virtualPath.substring(1).split("\\\\");
+            if(args.length == 1){// "\\projects"
 
-        if(virtualPath.compareTo("\\projects") == 0){
-            List<File> files = Directory.findAllProjects();
-            List<PathInfo> pathInfos = new ArrayList<PathInfo>();
-            for(File file : files){
-                PathInfo info = new PathInfo(file , "projects");
-                String dir = info.getDir();
-                String path[] = dir.split("\\\\");
-                info.setDir("\\" + path[1] + "\\" + path[2]);
-                info.setFileName(path[2]);
-                pathInfos.add(info);
-
-            }
-            result = PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "Directory" , virtualPath);
-        }else{
-            String realPath = Directory.virtualPathToRealPath(virtualPath);
-            File temp = new File(realPath);
-            if(  (  !temp.exists() || //  \projects\lucene , can not map to a real path , but it is valid
-                    temp.exists() && temp.isDirectory()) //is a directory
-                    ){
-                List<File> files = Directory.getSubDirByVirtualPath(virtualPath);
-                List<PathInfo> pathInfos = new ArrayList<PathInfo>();
-                String type = virtualPath.startsWith("\\projects") ? "projects" : "dataType";
-                for(File file : files){
-                    pathInfos.add(new PathInfo(file , type));
+                for(String project : Directory.getProjects()){
+                    pathInfos.add(new PathInfo(project));
                 }
-                result = PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "Directory" , virtualPath);
-            }else{
-                result = null;
+            }else if(args.length == 2){
+                String project = args[1];
+
+                for(String dataType : Directory.dataTypePaths.keySet()){
+                    Map<String, String> dataTypePath = Directory.dataTypePaths.get(dataType);
+                    if(dataTypePath.containsKey(project)){
+                        pathInfos.add(new PathInfo(project , dataType));
+                    }
+                }
+            }else if(args.length > 2){
+                List<File> files = Directory.getSubDirByVirtualPath(virtualPath);
+                for(File file : files){
+                    pathInfos.add(new PathInfo(file , "projects"));
+                }
+            }
+        }else if(virtualPath.startsWith("\\dataType")){
+            List<File> files = Directory.getSubDirByVirtualPath(virtualPath);
+            for(File file : files){
+                pathInfos.add(new PathInfo(file , "dataType"));
             }
         }
-        return result;
+
+        pathInfos.sort(new Comparator<PathInfo>() {
+            @Override
+            public int compare(PathInfo o1, PathInfo o2) {
+                if(o1.getType() == PathType.DIRECTORY && o2.getType() == PathType.FILE)
+                    return -1;
+                else if(o2.getType() == PathType.DIRECTORY && o1.getType() == PathType.FILE)
+                    return 1;
+                else {
+                    int result = o1.getFileName().compareTo(o2.getFileName());
+                    return result == 0 ? 0 : (result > 0 ? 1 : -1);
+                }
+            }
+        });
+        return PathInfo.toJSONObject(pathInfos.toArray(new PathInfo[0]) , "Directory" , virtualPath);
     }
 
     private JSONObject searchDirectory(String query){

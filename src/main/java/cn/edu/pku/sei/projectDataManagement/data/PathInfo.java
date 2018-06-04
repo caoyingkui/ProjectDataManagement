@@ -60,6 +60,8 @@ public class PathInfo {
     }
     //endregion
 
+
+
     public static void main(String[] args){
         File file = new File("E:\\CrawlData\\Apache");
         show(file);
@@ -145,6 +147,26 @@ public class PathInfo {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 一个项目的根目录比较特殊，所以特别声明一个构造函数
+     * @param projectName
+     */
+    public PathInfo(String projectName){
+        status = true;
+        this.dir = "\\projects\\" + projectName;
+        this.type = PathType.DIRECTORY;
+        this.fileName = projectName;
+        this.metaInfo = new MetaInfo(projectName, Directory.getPathLevel(""));
+    }
+
+    public PathInfo(String projectName, String dataType){
+        status = true;
+        this.dir = "\\projects\\" + projectName + "\\" + dataType;
+        this.type = PathType.DIRECTORY;
+        this.fileName = dataType;
+        this.metaInfo = new MetaInfo(projectName, Directory.getPathLevel(""));
     }
 
     private String dataSizeConvertToString(long size) {

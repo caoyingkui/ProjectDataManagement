@@ -21,7 +21,12 @@ import java.util.zip.ZipOutputStream;
  * Created by oliver on 2017/10/18.
  */
 public class DownloadServlet extends HttpServlet{
+    public class test{
 
+    }
+
+    public static class tests{
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

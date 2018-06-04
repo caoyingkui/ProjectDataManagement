@@ -210,6 +210,9 @@ function sidebutton(text){
         path.cur = "Sources";
         showList(obj.data);
 
+        d3.select("#Sources").attr("class" , "active");
+        d3.select("#Projects").attr("class" , "");
+
     } else if (text == "Projects") {
         sidebar.isSources = false;
         sidebar.isProjects = true;
@@ -218,9 +221,26 @@ function sidebutton(text){
         path.paths = [];
         path.cur = "Projects";
         showList(obj.data);
+
+        d3.select("#Sources").attr("class" , "");
+        d3.select("#Projects").attr("class" , "active");
     }
 
 };
+
+function showProject(project , dataType){
+    var path = "\\projects\\" + project;
+    if(dataType === "") path += ("\\" + dataType);
+    var obj = requestBrowse( path);
+    path.paths =[];
+    path.cur = "Projects";
+    showList(obj.data);
+    showPath(path);
+
+    d3.select("#Projects").attr("class" , "active");
+    d3.select("#Sources").attr("class" , "");
+
+}
 
 function prevhref(name){
     var pathstr = "";
