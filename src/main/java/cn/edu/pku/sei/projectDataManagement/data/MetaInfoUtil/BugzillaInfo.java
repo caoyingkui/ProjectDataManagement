@@ -50,6 +50,7 @@ public class BugzillaInfo extends MetaInfo{
      */
     public JSONObject getMetaInfo_ROOT(){
         JSONObject result = new JSONObject();
+        result.put("pathLevel" , PathLevel.BUGZILLA_ROOT);
 
         //region <get project amount>
         int projectAmount = getProjectAmount();
@@ -61,6 +62,7 @@ public class BugzillaInfo extends MetaInfo{
 
     public JSONObject getMetaInfo_PROJECT(){
         JSONObject result = new JSONObject();
+        result.put("pathLevel" , PathLevel.BUGZILLA_PROJECT);
 
         File file = new File(path);
         // region<get bug amount>

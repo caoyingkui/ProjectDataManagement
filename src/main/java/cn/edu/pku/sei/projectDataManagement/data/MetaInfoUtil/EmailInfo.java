@@ -19,7 +19,18 @@ public class EmailInfo extends MetaInfo{
 
     @Override
     protected int getProjectAmount() {
-        return 0;
+        File file = new File(path);
+        return file.listFiles().length;
+    }
+
+    @Override
+    public JSONObject toJSONObject() {
+        switch (this.pathLevel){
+            case EMAIL_ROOT: return getMetaInfo_ROOT();
+            case EMAIL_PROJECT: return getMetaInfo_PROJECT();
+            case EMAIL_MAILBOX: return getMetaInfo_MailBox();
+        }
+        return null;
     }
 
     private  JSONObject getMetaInfo_ROOT(){
@@ -49,7 +60,7 @@ public class EmailInfo extends MetaInfo{
         }
 
         result.put("mailBoxAmount" , mailBox.length());
-        result.put("mailBoxList" , mailBox.toString());
+        result.put("mailBoxList" , mailBox);
 
         return result;
     }
@@ -66,7 +77,13 @@ public class EmailInfo extends MetaInfo{
         Map<String , Integer> result = new HashMap<String, Integer>();
         File[] files = new File(path).listFiles();
         for(File f : files){
-            result.put(f.getName() , getMailAmount(f.getAbsolutePath()));
+            if(f.isDirectory()) {
+                try {
+                    result.put(f.getName(), getMailAmount(f.getAbsolutePath()));
+                }catch(Exception e){
+                    ;
+                }
+            }
         }
         return result;
     }

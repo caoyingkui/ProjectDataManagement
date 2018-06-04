@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ProjectDataManagement.iml" filepath="$PROJECT_DIR$/ProjectDataManagement.iml" />
-      <module fileurl="file://E:\Intellij workspace\ProjectDataManagement\dataBorwswer\dataBorwswer.iml" filepath="E:\Intellij workspace\ProjectDataManagement\dataBorwswer\dataBorwswer.iml" />
     </modules>
   </component>
 </project>

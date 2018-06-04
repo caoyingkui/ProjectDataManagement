@@ -1,5 +1,5 @@
 var sidebar = new Vue({
-    el : '#sidebar',
+    el : '#labels',
     data: {
         isSources: true,
         isProjects: false
@@ -33,93 +33,96 @@ var lists = new Vue({
     data: {
         items: [
             {
-                headId : 'head1',
                 abPath : 'StackOverflow',
                 name : 'StackOverflow',
                 detail : 'details',
-                collapseHref : '#collapse1',
-                collapseId : 'collapse1',
                 size : "50M",
                 isFolder : false,
 
             },
             {
-                headId : 'head2',
                 abPath : 'GitHub',
                 name : 'GitHub',
                 detail : 'details',
-                collapseHref : '#collapse2',
-                collapseId : 'collapse2',
                 size : "50M",
                 isFolder : false,
             },
             {
-                headId : 'head3',
                 abPath : 'Mail',
                 name : 'Mail',
                 detail : 'details',
-                collapseHref : '#collapse3',
-                collapseId : 'collapse3',
                 size : "50M",
                 isFolder : true,
             },
             {
-                headId : 'head4',
                 abPath : 'Bugzilla',
                 name : 'Bugzilla',
                 detail : 'details',
-                collapseHref : '#collapse4',
-                collapseId : 'collapse4',
                 size : '50M',
                 isFolder : true,
             }
         ],
-        isSearch: false
-
+        isSearch: false,
 
     },
     components: {
         doc: {
-            props: ['headId', 'abPath', 'name', 'detail', 'collapseHref', 'collapseId', 'icon', 'titleClass', 'size', 'isFolder', 'showPath'],
-            template: '<div class="panel panel-default" v-if=isFolder>\n' +
-            '                    <div class="panel-heading" :id="headId">\n' +
-            '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
-            '                        <span class="glyphicon glyphicon-folder-open" style="padding-right: 10px"></span>\n' +
-            '                        <span class="panel-title tran-hand nexthref" style="width:100px" onclick="nexthref(this.textContent)">{{ name }}</span>\n' +
-            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px" v-if=showPath>{{ abPath }}</span>' +
-            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{ size }}</span>' +
-            '                        <div class="navbar-right chevron-down" >\n' +
-            '                            <span class="glyphicon glyphicon-chevron-down tran-hand" data-toggle="collapse" data-parent="#lists" :href="collapseHref"></span>\n' +
-            '                        </div>\n' +
-            '                        \n' +
-            '                    </div>\n' +
-            '                    <div :id="collapseId" class="panel-collapse collapse">\n' +
-            '                        <div class="panel-body">\n' +
-            '                            {{ detail }}\n' +
-            '                        </div>\n' +
-            '                    </div>\n' +
-            '         </div>\n' +
-            '         <div class="panel panel-default" v-else>\n' +
-            '                    <div class="panel-heading" :id="headId">\n' +
-            '                        <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
-            '                        <span class="glyphicon glyphicon-file" style="padding-right: 10px"></span>\n' +
-            '                        <span class="panel-title" style="width:100px">{{ name }}</span>\n' +
-            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px" v-if=showPath>{{ abPath }}</span>' +
-            '                        <span class="panel-title" style="color: #ccc; padding-left: 10px">{{ size }}</span>' +
-            '                        <div class="navbar-right chevron-down" >\n' +
-            '                            <span class="glyphicon glyphicon-chevron-down tran-hand" data-toggle="collapse" data-parent="#lists" :href="collapseHref"></span>\n' +
-            '                        </div>\n' +
-            '                        \n' +
-            '                    </div>\n' +
-            '                    <div :id="collapseId" class="panel-collapse collapse">\n' +
-            '                        <div class="panel-body">\n' +
-            '                            {{ detail }}\n' +
-            '                        </div>\n' +
-            '                    </div>\n' +
-            '          </div>'
-        }
+            props: ['abPath', 'name', 'detail', 'size', 'isFolder', 'showPath'],
+            template: '<tr v-if="isFolder">\n' +
+            '              <td>\n' +
+            '                  <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
+            '                  <span class="glyphicon glyphicon-folder-open" style="padding-right: 10px"></span>\n' +
+            '                  <span class="tran-hand nexthref" onclick="nexthref(this.textContent)">{{ name }}</span>\n' +
+            '                  <span style="color: #ccc; padding-left: 10px" v-if=showPath>{{ abPath }}</span>\n' +
+            '                  <span style="color: #ccc; padding-left: 10px">{{ size }}</span>\n' +
+            '              </td>\n' +
+            '          </tr>\n' +
+            '          <tr v-else>\n' +
+            '              <td>\n' +
+            '                  <span class="box" ><input type="checkbox" :value="abPath" name="checks"></span>\n' +
+            '                  <span class="glyphicon glyphicon-file" style="padding-right: 10px"></span>\n' +
+            '                  <span>{{ name }}</span>\n' +
+            '                  <span style="color: #ccc; padding-left: 10px" v-if=showPath>{{ abPath }}</span>\n' +
+            '                  <span style="color: #ccc; padding-left: 10px">{{ size }}</span>\n' +
+            '              </td>\n' +
+            '          </tr>\n'
+        },
+
+
 
     }
+});
+
+var pages = new Vue({
+    el : '#pages',
+    data: {
+        pages:[
+            {
+                text: '<<',
+                isCurrent: false
+            },
+            {
+                text: '3',
+                isCurrent: false
+            },
+            {
+                text: '4',
+                isCurrent: false
+            },
+            {
+                text: '5',
+                isCurrent: true
+            }
+        ]
+    },
+    components: {
+        page: {
+            props: ['text', 'isCurrent'],
+            template: '<li class="active" v-if="isCurrent"><a class="tran-hand">{{ text }}</a></li>\n' +
+            '<li v-else><a class="tran-hand">{{ text }}</a></li>\n'
+        }
+    }
+
 });
 
 function requestBrowse(pathStr) {
@@ -172,7 +175,8 @@ function showList(arr) {
         tmp.abPath = arr[i].dir;
         tmp.name = arr[i].fileName;
         tmp.size = arr[i].dataSize;
-        tmp.detail = JSON.stringify(arr[i].metaInfo);
+        //tmp.detail = JSON.stringify(arr[i].metaInfo);
+        tmp.detail = change(arr[i].metaInfo);
         tmp.collapseHref = "#collapse" + i;
         tmp.collapseId = "collapse" + i;
         if (arr[i].type == "directory") {
@@ -184,17 +188,43 @@ function showList(arr) {
     }
     lists.isSearch=false;
 
+    var checkboxes = document.getElementsByName("checks");
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked)
+            checkboxes[i].checked = false;
+    }
 
+
+}
+function change(obj) {
+    var result="<pre>";
+    for(var item in obj){
+        if(typeof obj[item] == 'object') {
+            result += item + ":\n";
+
+            var inner = obj[item];
+            for(var i = 0; i < inner.length; i++){
+                for(var ikey in inner[i]) {
+                    result += "\t" + ikey + ":" + inner[i][ikey] + ",";
+                }
+                result += "\n";
+            }
+
+        } else {
+            result += item + ":" + obj[item] + "\n";
+        }
+
+    }
+
+    return result + "</pre>";
 }
 
 $(document).ready(function(){
 
-    // sidebar.isSources = true;
-    // sidebar.isProjects = false;
-    // obj = requestBrowse("\\dataType");
-    // path.paths = [];
-    // path.cur = "dataType";
-    // showList(obj.data);
+    obj = requestBrowse("\\dataType\\");
+    path.paths = [];
+    path.cur = "Sources";
+    showList(obj.data);
 
 });
 
@@ -278,7 +308,7 @@ function nexthref(name) {
     }
 };
 
-function submit() {
+function download() {
     var checkboxes = document.getElementsByName("checks");
     var value = null;
 

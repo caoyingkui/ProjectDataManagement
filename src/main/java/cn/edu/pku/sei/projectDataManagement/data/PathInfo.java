@@ -225,11 +225,13 @@ public class PathInfo {
                 if(absolutePath != null)
                     result.put("absolutePath" , absolutePath);
                 JSONArray array = new JSONArray();
-                JSONObject temp = new JSONObject() ;
+                JSONObject temp ;
                 for(PathInfo pathInfo : pathInfos){
                     temp = pathInfo.toJSONObject();
-                    if(temp != null)
-                        array.put(pathInfo.toJSONObject());
+
+                    if(temp != null) {
+                        array.put(temp);
+                    }
                 }
                 result.put("data" , array);
             }

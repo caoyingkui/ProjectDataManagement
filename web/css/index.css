@@ -4,10 +4,7 @@ body {
 .tran-hand:hover {
     cursor: pointer;
 }
-#sidebar {
-    position: fixed;
-    text-align: center;
-}
+
 .box {
     padding-right: 20px;
 }
@@ -21,4 +18,3 @@ body {
     text-decoration: underline;
     color: #23527c;
 }
-
